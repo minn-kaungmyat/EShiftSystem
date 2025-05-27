@@ -1,0 +1,63 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+@{
+    Layout = "/Views/Shared/_AuthLayout.cshtml";
+}
+
+
+@* <h1>@ViewData["Title"]</h1> *@
+<div class="row">
+    <div class="col-md-4">
+        <div class="auth-header">
+            <h2 class="logo">e-<span>Shift</span></h2>
+            <p>Transport Management System</p>
+        </div>
+       
+        <section>
+            <form id="account" method="post">
+               
+                @* <h3 class="title">Login</h3> *@
+				@* <hr /> *@
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+				<div class="form-floating mb-3 form-group">
+					<label asp-for="Input.Email" class="form-label">Email</label>
+                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                    <span asp-validation-for="Input.Email" class="text-danger error-message"></span>
+                </div>
+                <div class="form-floating mb-3 form-group">
+                    <label asp-for="Input.Password" class="form-label">Password</label>
+                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true"  />
+                    <span asp-validation-for="Input.Password" class="text-danger error-message"></span>
+                </div>
+                <div class="checkbox mb-3 form-check">
+                    <label asp-for="Input.RememberMe" class="form-label">
+                        <input class="form-check-input" asp-for="Input.RememberMe" />
+                        @Html.DisplayNameFor(m => m.Input.RememberMe)
+                    </label>
+                </div>
+                <div>
+                    <button style="width: 100%" id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Login</button>
+                </div>
+                <div class="auth-links">
+                    
+                    <a id="forgot-password" asp-page="./ForgotPassword">Forgot password?</a>
+                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
+                   
+                    @* <p> *@
+                    @*     <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a> *@
+                    @* </p> *@
+                </div>
+            </form>
+        </section>
+    </div>
+   
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
