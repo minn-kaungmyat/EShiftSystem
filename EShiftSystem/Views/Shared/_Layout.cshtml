@@ -8,35 +8,73 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/EShiftSystem.styles.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">EShiftSystem</a>
+                <a class="navbar-brand logo" asp-area="" asp-controller="Home" asp-action="Index"><h2 class="logo">e-<span>Shift</span></h2></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+                    @* <ul class="navbar-nav flex-grow-1"> *@
+                    @*     <li class="nav-item"> *@
+                    @*         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a> *@
+                    @*     </li> *@
+                    @*     <li class="nav-item"> *@
+                    @*         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a> *@
+                    @*     </li> *@
+                    @* </ul> *@
+                    <div></div>
                     <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    <div class="d-flex body">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+
+            @{
+                var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+                var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+                var currentArea = ViewContext.RouteData.Values["area"]?.ToString();
+            }
+
+            <ul class="flex-column sidebar-menu">
+                <li>
+                    <a asp-area="" asp-controller="Home" asp-action="Index"
+                       class="@(currentController == "Dashboard" && currentAction == "Index" ? "active" : "")">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a asp-area="" asp-controller="Home" asp-action="Privacy"
+                       class="@(currentController == "Home" && currentAction == "Privacy" ? "active" : "")">
+                        <i class="fas fa-user-shield"></i> Privacy
+                    </a>
+                </li>
+                <li>
+                    <a asp-area="" asp-controller="Contact" asp-action="Index"
+                       class="@(currentController == "Contact" && currentAction == "Index" ? "active" : "")">
+                        <i class="fas fa-envelope"></i> Contact
+                    </a>
+                </li>
+            </ul>
+
+
+        </nav>
+
+        <!-- Main content -->
+        <div class="flex-grow-1">
+            <main role="main" class="content">
+                @RenderBody()
+            </main>
+        </div>
     </div>
 
     <footer class="border-top footer text-muted">

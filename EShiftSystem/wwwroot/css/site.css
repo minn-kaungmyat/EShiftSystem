@@ -21,14 +21,20 @@ html,.btn {
         font-family: 'Poppins', sans-serif;
     }
 }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
+    box-sizing: border-box;
 }
 
 body {
@@ -58,3 +64,36 @@ a {
     transition: color 0.2s ease;
 }
 
+.logo {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    color: var(--primary);
+    line-height: normal;
+    margin: 0;
+    text-align: center;
+}
+
+
+.logo span {
+    color: var(--secondary);
+}
+
+.sidebar-menu a.active {
+    color: var(--secondary);
+    font-weight: 500;
+}
+
+.sidebar-menu a:hover, .sidebar-menu a.active {
+    background-color: var(--light-gray) !important;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    color: var(--primary);
+}

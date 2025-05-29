@@ -17,21 +17,8 @@
     margin-bottom: 30px;
 }
 
-.logo {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-    font-size: 30px;
-    color: var(--primary);
-    line-height: normal;
-    margin:0;
-    text-align: center;
-}
 p{
     margin: 0;
-}
-
-.logo span {
-    color: var(--secondary);
 }
 
 .title {
