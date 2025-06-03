@@ -27,11 +27,10 @@ namespace EShiftSystem.Controllers
                 }
                 else
                 {
-                    // Default fallback if user has no role
-                    return RedirectToPage("/Account/Login", new { area = "Identity" });
+                    return View();
                 }
             }
-            return RedirectToPage("/Account/Login", new { area = "Identity" });
+            return View();
         }
 
 
@@ -54,7 +53,7 @@ namespace EShiftSystem.Controllers
             }
             else
             {
-                return RedirectToAction("Index", "Home");
+                return View();
             }
         }
 

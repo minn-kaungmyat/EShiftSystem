@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EShiftSystem.Models
 {
@@ -11,6 +11,16 @@ namespace EShiftSystem.Models
         [Required]
         public DateTime JobDate { get; set; }
 
+        [Required]
+        [StringLength(100)]
+        public string JobTitle { get; set; } = string.Empty;
+
+        [StringLength(500)]
+        public string? Description { get; set; }
+
+        [Required]
+        public JobPriority Priority { get; set; } = JobPriority.Normal;
+
         // Foreign key to Customer
         [ForeignKey("Customer")]
         public int CustomerId { get; set; }
@@ -18,7 +28,6 @@ namespace EShiftSystem.Models
         public required Customer Customer { get; set; }
 
         // Navigation property: 1 Job has many Loads
-        public required ICollection<Load> Loads { get; set; }
+        public ICollection<Load> Loads { get; set; } = new List<Load>();
     }
-
 }

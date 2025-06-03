@@ -1,12 +1,16 @@
 :root {
     --primary: #004080;
+    --primary-light: #005cb3;
+    --primary-dark: #002b57;
     --secondary: #FFA500;
-    --light-gray: #F5F5F5;
+    --secondary-light: #ffb833;
+    --secondary-dark: #cc8400;
+    --light-gray: #F5F7FA;
     --mid-gray: #E0E0E0;
     --dark-gray: #333333;
     --danger: #dc3545;
     --success: #28a745;
-    --warning: #ffc107;
+    --white: #ffffff;
     --info: #17a2b8;
 }
 
@@ -14,13 +18,13 @@ html,.btn {
     font-size: 14px;
     font-family: 'Poppins', sans-serif;
 }
-
+/*
 @media (min-width: 768px) {
     html, .btn {
         font-size: 16px;
         font-family: 'Poppins', sans-serif;
     }
-}
+}*/
 * {
     margin: 0;
     padding: 0;
@@ -38,7 +42,7 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+/*  margin-bottom: 60px;*/
   box-sizing: border-box;
 }
 
@@ -61,7 +65,7 @@ body {
 a {
     text-decoration: none;
     color: var(--primary);
-    transition: color 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .logo {
@@ -72,6 +76,14 @@ a {
     line-height: normal;
     margin: 0;
     text-align: center;
+}
+
+.navbar-light .navbar-nav .nav-link {
+    padding: 0 !important
+}
+
+.navbar-expand-sm .navbar-nav .nav-link {
+    padding: 0 !important
 }
 
 
@@ -96,4 +108,66 @@ a {
     border-radius: 4px;
     transition: all 0.2s ease;
     color: var(--primary);
+}
+
+.main-nav ul li a:hover, .btn-primary:hover {
+    color: var(--secondary) !important;
+}
+
+.main-nav ul li a {
+    font-weight: 500;
+    position: relative;
+    display: inline-block;
+    transition: color 0.3s ease;
+    color: var(--primary) !important;
+}
+
+.main-nav ul li a:after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--secondary);
+    transition: width 0.3s ease;
+}
+
+.main-nav ul li a:hover::after {
+    width: 100%; /* Makes underline expand on hover */
+}
+
+.nav-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 14px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+}
+
+.btn-outline:hover {
+    background-color: var(--primary);
+    color: white;
+ }
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    
 }
