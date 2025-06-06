@@ -1,0 +1,64 @@
+﻿@model EShiftSystem.ViewModels.TransportUnitFormViewModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="content-header"><h2>Edit Transport Unit</h2></div>
+
+<form asp-action="Edit" method="post">
+
+    <div class="form-wrapper">
+        <input type="hidden" asp-for="TransportUnit.TransportUnitId" />
+        <div class="form-group">
+            <label asp-for="TransportUnit.Name"></label>
+            <input asp-for="TransportUnit.Name" class="form-control" />
+            <span asp-validation-for="TransportUnit.Name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="TransportUnit.LorryId">Lorry</label>
+            <select asp-for="TransportUnit.LorryId" asp-items="ViewBag.LorryId" class="form-control select2 select2-single">
+                <option value="">-- Select Lorry --</option>
+            </select>
+
+        </div>
+
+        <div class="form-group">
+            <label asp-for="TransportUnit.DriverId">Driver</label>
+            <select asp-for="TransportUnit.DriverId" asp-items="ViewBag.DriverId" class="form-control select2 select2-single">
+                <option value="">-- Select Driver --</option>
+            </select>
+
+        </div>
+
+        <div class="form-group">
+            <label asp-for="TransportUnit.ContainerId">Container</label>
+            <select asp-for="TransportUnit.ContainerId" asp-items="ViewBag.ContainerId" class="form-control select2 select2-single">
+                <option value="">-- Select Container --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Assistants</label>
+            <select asp-for="SelectedAssistantIds" asp-items="ViewBag.AssistantIds" class="form-control select2 select2-multiple" multiple="multiple"></select>
+        </div>
+
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-action="Index" class="btn btn-outline">Cancel</a>
+    </div>
+</form>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+           $('.select2-multiple').select2({
+                placeholder: $(this).data('placeholder'), // Get placeholder from data attribute
+                allowClear: true
+            });
+
+            // Initialize Select2 for single selection
+            $('.select2-single').select2({
+                placeholder: $(this).data('placeholder'), // Get placeholder from data attribute
+                allowClear: true // Allow clearing the selection
+            });
+        });
+    </script>
+}

@@ -11,7 +11,7 @@ namespace EShiftSystem.Models
         public required string Name { get; set; }
 
         // Foreign key to TransportUnit for one-to-many relation
-        public int TransportUnitId { get; set; }
+        public int? TransportUnitId { get; set; }
         public TransportUnit? TransportUnit { get; set; }
     }
 

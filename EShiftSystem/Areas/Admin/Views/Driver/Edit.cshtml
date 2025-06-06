@@ -1,0 +1,22 @@
+﻿@model EShiftSystem.Models.Driver
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-header"><h2>Edit Driver</h2></div>
+
+<form asp-action="Edit" method="post">
+    <div class="form-wrapper">
+        <input type="hidden" asp-for="DriverId" />
+        <div class="form-group">
+            <label asp-for="Name"></label>
+            <input asp-for="Name" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="License"></label>
+            <input asp-for="License" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-action="Index" class="btn btn-outline">Cancel</a>
+    </div>
+</form>

@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="~/EShiftSystem.styles.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 <body>
     <header>
@@ -73,11 +73,40 @@
 
                             </a>
                     </li>
+                    <li>
+                        <a asp-area="Admin" asp-controller="Driver" asp-action="Index"
+                           class="@(currentController == "Driver" ? "active" : "")">
+                            <i class="fas fa-id-badge"></i>
+                            Drivers
+
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-area="Admin" asp-controller="Container" asp-action="Index"
+                           class="@(currentController == "Container" ? "active" : "")">
+                            <i class="fas fa-boxes"></i> Containers
+
+
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-area="Admin" asp-controller="Assistant" asp-action="Index"
+                           class="@(currentController == "Assistant" ? "active" : "")">
+                            <i class="fas fa-user-friends"></i> Assistants
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-area="Admin" asp-controller="TransportUnit" asp-action="Index"
+                           class="@(currentController == "TransportUnit" ? "active" : "")">
+                            <i class="fas fa-dolly"></i> Transport Units
+                        </a>
+                    </li>
                 }
                 @if (isCustomer)
                 {
                     <li>
-                        <a asp-area="Customer" asp-controller="Jobs" asp-action="MyJobs">
+                        <a asp-area="Customer" asp-controller="Job" asp-action="Index"
+                           class="@(currentController == "Job" ? "active" : "")">
                             <i class="fas fa-list"></i> My Jobs
                         </a>
                     </li>
@@ -112,19 +141,25 @@
                     @RenderBody()
                 </main>
             </div>
-            <footer class=" footer text-muted">
+            @* <footer class=" footer text-muted">
                 <div class="container">
                     &copy; 2025 - EShiftSystem - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                 </div>
-            </footer>
+            </footer> *@
         </div>
         
     </div>
 
     
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    @* Or use the CDN if you prefer, but pick one: <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> *@
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

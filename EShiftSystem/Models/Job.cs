@@ -1,33 +1,40 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using EShiftSystem.Models.Enums;
 
-namespace EShiftSystem.Models
-{
-    public class Job
+    namespace EShiftSystem.Models
     {
-        [Key]
-        public int JobId { get; set; }
+        public class Job
+        {
+            [Key]
+            public int JobId { get; set; }
 
-        [Required]
-        public DateTime JobDate { get; set; }
+            [Required]
+            public DateTime JobDate { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string JobTitle { get; set; } = string.Empty;
+            [Required]
+            [StringLength(100)]
+            public string JobTitle { get; set; } = string.Empty;
 
-        [StringLength(500)]
-        public string? Description { get; set; }
+            [StringLength(500)]
+            public string? Description { get; set; }
 
-        [Required]
-        public JobPriority Priority { get; set; } = JobPriority.Normal;
+            [Required]
+            public JobPriority Priority { get; set; } = JobPriority.Normal;
 
         // Foreign key to Customer
-        [ForeignKey("Customer")]
-        public int CustomerId { get; set; }
+            [Required]
+            [ForeignKey("Customer")]
+            public int CustomerId { get; set; }
 
-        public required Customer Customer { get; set; }
+            public Customer Customer { get; set; }
 
-        // Navigation property: 1 Job has many Loads
-        public ICollection<Load> Loads { get; set; } = new List<Load>();
+            // Navigation property: 1 Job has many Loads
+            public ICollection<Load> Loads { get; set; } = new List<Load>();
+
+            public JobStatus Status { get; set; } = JobStatus.Pending;
+
+            public DateTime CreatedAt { get; set; } = DateTime.Now;
+            public DateTime? UpdatedAt { get; set; }
+        }
     }
-}

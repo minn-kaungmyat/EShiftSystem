@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using EShiftSystem.Models.Enums;
 
 namespace EShiftSystem.Models
 {
@@ -24,10 +25,16 @@ namespace EShiftSystem.Models
         [ForeignKey("TransportUnit")]
         public int TransportUnitId { get; set; }
 
-        public required TransportUnit TransportUnit { get; set; }
+        public TransportUnit TransportUnit { get; set; }
 
         // Navigation property: 1 Load can have many Products
-        public required ICollection<Product> Products { get; set; }
+        public  ICollection<Product> Products { get; set; }
+
+        [Required]
+        public JobStatus Status { get; set; } = JobStatus.Pending;
+
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? UpdatedAt { get; set; }
     }
 
 }

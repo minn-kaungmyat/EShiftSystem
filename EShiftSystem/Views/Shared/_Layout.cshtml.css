@@ -8,6 +8,7 @@ for details on configuring this project to bundle and minify static web assets. 
 header {
     position: sticky;
     top: 0;
+    z-index:100000;
 }
 .navbar{
     margin:0 !important;
@@ -133,3 +134,5 @@ button.accept-policy {
     display: flex;
     justify-content: center;
 }
+
+

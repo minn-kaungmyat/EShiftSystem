@@ -86,7 +86,7 @@ namespace EShiftSystem.Data
                 .HasMany(t => t.Assistants)
                 .WithOne(a => a.TransportUnit)
                 .HasForeignKey(a => a.TransportUnitId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 

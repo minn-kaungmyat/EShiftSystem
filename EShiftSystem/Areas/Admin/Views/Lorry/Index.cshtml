@@ -4,11 +4,13 @@
 
 @model IEnumerable<EShiftSystem.Models.Lorry>
 
-<h2>Lorries</h2>
+<div class="content-header">
+    <h2>Lorries</h2>
 
-<a class="btn btn-primary" asp-area="Admin" asp-controller="Lorry" asp-action="Create">Add New Lorry</a>
+    <a class="btn btn-primary" asp-area="Admin" asp-controller="Lorry" asp-action="Create"><i class="fas fa-plus"></i> Create New Lorry</a>
+</div>
 
-<table class="table mt-3">
+<table >
     <thead>
         <tr>
             <th>License Plate</th>
@@ -22,10 +24,15 @@
             <tr>
                 <td>@item.LicensePlate</td>
                 <td>@item.Model</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.LorryId">Edit</a> |
-                    <a asp-action="Delete" asp-route-id="@item.LorryId">Delete</a>
-                </td>
+               <td>
+    <a class="btn btn-sm btn-outline me-2" asp-action="Edit" asp-route-id="@item.LorryId" title="Edit">
+        <i class="fas fa-edit"></i> Edit
+    </a>
+    <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@item.LorryId" title="Delete">
+        <i class="fas fa-trash-alt"></i> Delete
+    </a>
+</td>
+
             </tr>
         }
     </tbody>

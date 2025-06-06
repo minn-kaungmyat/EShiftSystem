@@ -1,0 +1,33 @@
+﻿@model IEnumerable<EShiftSystem.Models.Container>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="content-header">
+    <h2>Containers</h2>
+    <a class="btn btn-primary" asp-area="Admin" asp-controller="Container" asp-action="Create">
+        <i class="fas fa-plus"></i> Create New Container
+    </a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Size</th>
+            <th>Type</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Size</td>
+                <td>@item.Type</td>
+                <td>
+                    <a class="btn btn-sm btn-outline me-2" asp-action="Edit" asp-route-id="@item.ContainerId"><i class="fas fa-edit"></i> Edit</a>
+                    <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@item.ContainerId"><i class="fas fa-trash-alt"></i> Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

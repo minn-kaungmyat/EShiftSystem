@@ -1,0 +1,35 @@
+﻿@model IEnumerable<EShiftSystem.Models.TransportUnit>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="content-header">
+    <h2>Transport Units</h2>
+    <a class="btn btn-primary" asp-action="Create"><i class="fas fa-plus"></i> Create New Transport Unit</a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Lorry</th>
+            <th>Driver</th>
+            <th>Container</th>
+            <th>Assistants</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var unit in Model)
+        {
+            <tr>
+                <td>@unit.Lorry?.LicensePlate</td>
+                <td>@unit.Driver?.Name</td>
+                <td>@unit.Container?.Type</td>
+                <td>@string.Join(", ", unit.Assistants.Select(a => a.Name))</td>
+                <td>
+                    <a class="btn btn-sm btn-outline" asp-action="Edit" asp-route-id="@unit.TransportUnitId"><i class="fas fa-edit"></i> Edit</a>
+                    <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@unit.TransportUnitId"><i class="fas fa-trash-alt"></i> Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

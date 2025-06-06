@@ -1,4 +1,4 @@
-﻿namespace EShiftSystem.Models
+﻿namespace EShiftSystem.Models.Enums
 {
     public enum JobPriority
     {

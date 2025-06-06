@@ -1,0 +1,23 @@
+﻿@model EShiftSystem.Models.TransportUnit
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>Delete Transport Unit</h2>
+<h4>Are you sure you want to delete this?</h4>
+<hr />
+<dl class="row">
+    <dt class="col-sm-3">Lorry</dt>
+    <dd class="col-sm-9">@Model.Lorry?.LicensePlate</dd>
+
+    <dt class="col-sm-3">Driver</dt>
+    <dd class="col-sm-9">@Model.Driver?.Name</dd>
+
+    <dt class="col-sm-3">Container</dt>
+    <dd class="col-sm-9">@Model.Container?.Type</dd>
+</dl>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="TransportUnitId" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-outline">Cancel</a>
+</form>

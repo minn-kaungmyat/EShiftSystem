@@ -1,0 +1,33 @@
+﻿@model IEnumerable<EShiftSystem.Models.Assistant>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="content-header">
+    <h2>Assistants</h2>
+    <a class="btn btn-primary" asp-action="Create">
+        <i class="fas fa-plus"></i> Create New Assistant
+    </a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Assigned Unit</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.TransportUnit?.Name</td>
+                <td>
+                    <a class="btn btn-sm btn-outline me-2" asp-action="Edit" asp-route-id="@item.AssistantId"><i class="fas fa-edit"></i> Edit</a>
+                    <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@item.AssistantId"><i class="fas fa-trash-alt"></i> Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

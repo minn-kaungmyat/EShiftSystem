@@ -1,0 +1,49 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model IEnumerable<EShiftSystem.Models.Job>
+
+<div class="content-header">
+    <h2>Jobs</h2>
+
+    <a class="btn btn-primary" asp-controller="Job" asp-action="Create">
+        <i class="fas fa-plus"></i> Create New Job
+    </a>
+</div>
+
+<table class=" table-hover">
+    <thead >
+        <tr>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Created At</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var job in Model)
+        {
+            <tr>
+                <td>@job.JobTitle</td>
+                <td>@job.JobDate.ToShortDateString()</td>
+                <td>@job.Priority</td>
+                <td>@job.Status</td>
+                <td>@job.CreatedAt.ToShortDateString()</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-primary me-2" asp-action="Details" asp-route-id="@job.JobId" title="Details">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a class="btn btn-sm btn-outline-secondary me-2" asp-action="Edit" asp-route-id="@job.JobId" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@job.JobId" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
