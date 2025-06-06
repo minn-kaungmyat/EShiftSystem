@@ -32,7 +32,11 @@ html,.btn {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--primary-light);
+}
+
+.btn-primary:focus{
+    background-color: var(--primary-light) !important;
 }
 
 html {
@@ -223,7 +227,7 @@ h1, h2, h3, h4, h5, h6 {
     }
 
     .form-group input, .form-group select, .form-group .select2, textarea {
-        width: 93.6% !important;
+        width:100%;
         padding: 12px;
         border: 1px solid var(--mid-gray);
         border-radius: 4px;
@@ -296,3 +300,110 @@ h1, h2, h3, h4, h5, h6 {
 .select2-container--default .select2-selection--single .select2-selection__clear{
     height: 24px !important;
 }
+
+.step-indicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.step-indicator::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--mid-gray);
+    z-index: 1;
+}
+
+.step {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.step.active .step-number {
+    background-color: var(--primary);
+}
+
+.step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--mid-gray);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 10px;
+}
+
+.step-label {
+    font-size: 12px;
+}
+
+.step.completed .step-number {
+    background-color: var(--success);
+}
+
+/* Hide inactive step content */
+.step-content {
+    display: none;
+}
+
+.step-content.active {
+    display: block;
+}
+
+/* Hide navigation buttons initially, show as needed */
+.navigation-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between; /* Aligns prev/next buttons */
+}
+
+#prevBtn {
+    display: none; /* Hide prev button on first step */
+}
+
+#submitBtn {
+    display: none; /* Hide submit button until last step */
+}
+
+.card{
+    border-radius: 10px !important;
+}
+
+.card-header:first-child {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.card-header {
+    background-color: #f9f9f9 !important;
+    border-bottom: 0 !important;
+}
+
+.custom-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+    .custom-divider::before,
+    .custom-divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+.divider-text {
+    padding: 0 1rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+</style
