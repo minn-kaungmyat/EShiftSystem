@@ -4,18 +4,20 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EShiftSystem.ViewModels
 {
-    public class ProductViewModel
+    // Renamed from ProductViewModel and properties updated
+    public class LoadItemViewModel
     {
         [Required]
-        [Display(Name = "Product Name")]
-        public string Name { get; set; }
+        [Display(Name = "Item Type")]
+        public string ItemType { get; set; } // e.g., "Furniture", "Documents"
 
         [Range(1, int.MaxValue)]
         public int Quantity { get; set; } = 1;
 
-        [Range(0, 10000)]
-        public float Weight { get; set; }
+        [StringLength(200)]
+        public string? Note { get; set; }
     }
+
     // A small ViewModel for just the Load details
     public class LoadViewModel
     {
@@ -26,22 +28,23 @@ namespace EShiftSystem.ViewModels
         [Required]
         public string Destination { get; set; }
 
-        [Required(ErrorMessage = "Please select a transport unit.")]
-        [Display(Name = "Transport Unit")]
-        public int TransportUnitId { get; set; }
-        public List<ProductViewModel> Products { get; set; }
+        // Changed from List<ProductViewModel> Products
+        public List<LoadItemViewModel> LoadItems { get; set; }
 
         public LoadViewModel()
         {
             // Always initialize the list
-            Products = new List<ProductViewModel>();
+            // Changed from Products
+            LoadItems = new List<LoadItemViewModel>();
         }
     }
 
-    // The main ViewModel for the entire page
+    // The main ViewModel for the entire page (Structure remains the same)
     public class JobCreateViewModel
     {
         // Properties for the Job
+        public int JobId { get; set; }
+
         [Required(ErrorMessage = "Please select a date for the job.")]
         [DataType(DataType.Date)]
         [Display(Name = "Job Date")]
@@ -58,11 +61,15 @@ namespace EShiftSystem.ViewModels
         [Required]
         public JobPriority Priority { get; set; } = JobPriority.Normal;
 
+        public JobStatus Status { get; set; }
+
         // A list to hold all the load forms
         public List<LoadViewModel> Loads { get; set; }
 
         public JobCreateViewModel()
         {
+            // Set default date to today
+            JobDate = DateTime.Now;
             // Start with one empty load form ready for the user
             Loads = new List<LoadViewModel>();
         }

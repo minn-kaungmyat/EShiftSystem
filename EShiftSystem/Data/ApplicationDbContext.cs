@@ -20,7 +20,9 @@ namespace EShiftSystem.Data
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<Assistant> Assistants { get; set; }
         public DbSet<Container> Containers { get; set; }
-        public DbSet<Product> Products { get; set; }
+        //public DbSet<Product> Products { get; set; }
+
+        public DbSet<LoadItem> LoadItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -47,11 +49,17 @@ namespace EShiftSystem.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // One Load has many Products
+            //modelBuilder.Entity<Load>()
+            //    .HasMany(l => l.Products)
+            //    .WithOne(p => p.Load)
+            //    .HasForeignKey(p => p.LoadId)
+            //    .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Load>()
-                .HasMany(l => l.Products)
-                .WithOne(p => p.Load)
-                .HasForeignKey(p => p.LoadId)
-                .OnDelete(DeleteBehavior.Cascade);
+               .HasMany(l => l.LoadItems) // Changed from l.Products
+               .WithOne(p => p.Load)
+               .HasForeignKey(p => p.LoadId)
+               .OnDelete(DeleteBehavior.Cascade);
 
             // One Load has one TransportUnit
             modelBuilder.Entity<Load>()

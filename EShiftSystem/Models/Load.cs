@@ -21,20 +21,19 @@ namespace EShiftSystem.Models
         [Required, MaxLength(100)]
         public required string Destination { get; set; }
 
-        // FK to TransportUnit
+        // FK to TransportUnit - now nullable
         [ForeignKey("TransportUnit")]
-        public int TransportUnitId { get; set; }
+        public int? TransportUnitId { get; set; }
 
-        public TransportUnit TransportUnit { get; set; }
+        public TransportUnit? TransportUnit { get; set; }
 
         // Navigation property: 1 Load can have many Products
-        public  ICollection<Product> Products { get; set; }
+        public ICollection<LoadItem> LoadItems { get; set; } // instead of Product
 
         [Required]
         public JobStatus Status { get; set; } = JobStatus.Pending;
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.Now; 
         public DateTime? UpdatedAt { get; set; }
     }
-
 }

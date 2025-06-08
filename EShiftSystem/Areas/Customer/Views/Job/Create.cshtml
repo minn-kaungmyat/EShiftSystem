@@ -1,16 +1,12 @@
-﻿@* Views/Job/Create.cshtml *@
-@model EShiftSystem.ViewModels.JobCreateViewModel
+﻿@model EShiftSystem.ViewModels.JobCreateViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 @{
     ViewData["Title"] = "Create New Job";
-    // We get the SelectList from the ViewBag set in the controller
-    var transportUnits = ViewBag.TransportUnits as SelectList;
 }
 
 <div class="content-header"><h2>Create Transport Unit</h2></div>
-@* other class "step-completed" *@
 <div class="step-indicator">
     <div class="step" data-step="1">
         <div class="step-number">1</div>
@@ -29,120 +25,111 @@
 <form asp-action="Create" method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-    @* SECTION 1: JOB DETAILS *@
     <div id="step-1" class="step-content active">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group mb-3">
-                <label asp-for="JobTitle" class="control-label"></label>
-                <input asp-for="JobTitle" class="form-control" />
-                <span asp-validation-for="JobTitle" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="Priority" class="control-label"></label>
-                <select asp-for="Priority" asp-items="Html.GetEnumSelectList<EShiftSystem.Models.Enums.JobPriority>()" class="form-control"></select>
-                <span asp-validation-for="Priority" class="text-danger"></span>
-            </div>       
-        </div>
-        <div class="col-md-6">
-            <div class="form-group mb-3">
-                <label asp-for="JobDate" class="control-label"></label>
-                <input asp-for="JobDate" type="date" class="form-control" />
-                <span asp-validation-for="JobDate" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="Description" class="control-label"></label>
-                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            
-        </div>
-    </div>
-    </div>
-
-    @* SECTION 2: DYNAMIC LOADS *@
-    <div id="step-2" class="step-content">
-    <div id="loads-container">
-        @for (var i = 0; i < Model.Loads.Count; i++)
-        {
-            <div class="card mb-3 load-entry">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="load-title mb-0">Load #@(i + 1)</h5>
-                    <button type="button" class="btn btn-sm btn-danger remove-load-btn">Remove Load</button>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label asp-for="JobTitle" class="control-label"></label>
+                    <input asp-for="JobTitle" class="form-control" />
+                    <span asp-validation-for="JobTitle" class="text-danger"></span>
                 </div>
-                <div class="card-body">
-                    @* --- Load Details --- *@
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label asp-for="Loads[i].StartLocation" class="control-label"></label>
-                                <input asp-for="Loads[i].StartLocation" class="form-control" />
-                                <span asp-validation-for="Loads[i].StartLocation" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label asp-for="Loads[i].Destination" class="control-label"></label>
-                                <input asp-for="Loads[i].Destination" class="form-control" />
-                                <span asp-validation-for="Loads[i].Destination" class="text-danger"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label asp-for="Loads[i].TransportUnitId" class="control-label"></label>
-                        @* Using the ViewBag.TransportUnits directly here *@
-                        <select asp-for="Loads[i].TransportUnitId" asp-items="transportUnits" class="form-control">
-                            <option value="">-- Select Transport Unit --</option>
-                        </select>
-                        <span asp-validation-for="Loads[i].TransportUnitId" class="text-danger"></span>
-                    </div>
+                <div class="form-group mb-3">
+                    <label asp-for="Priority" class="control-label"></label>
+                    <select asp-for="Priority" asp-items="Html.GetEnumSelectList<EShiftSystem.Models.Enums.JobPriority>()" class="form-control"></select>
+                    <span asp-validation-for="Priority" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-3">
+                    <label asp-for="JobDate" class="control-label"></label>
+                    <input asp-for="JobDate" type="date" class="form-control" />
+                    <span asp-validation-for="JobDate" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="Description" class="control-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                    @* --- NESTED DYNAMIC PRODUCTS for this load --- *@
-                        <div class="custom-divider">
-                            <span class="divider-text">Products in this Load</span>
-                        </div>
-                    <div class="products-container" data-load-index="@i">
-                        @for (var j = 0; j < Model.Loads[i].Products.Count; j++)
+    <div id="step-2" class="step-content">
+        <div id="loads-container">
+            @for (var i = 0; i < Model.Loads.Count; i++)
+            {
+                <div class="card mb-3 load-entry">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="load-title mb-0">Load #@(i + 1)</h5>
+                        @if (Model.Loads.Count > 1)
                         {
-                            <div class="row product-entry align-items-center">
-                                    <div class="col-md-5  form-group mb-3">
-                                    <label asp-for="Loads[i].Products[j].Name"></label>
-                                    <input asp-for="Loads[i].Products[j].Name" class="form-control" />
-                                    <span asp-validation-for="Loads[i].Products[j].Name" class="text-danger"></span>
-                                </div>
-                                    <div class="col-md-3  form-group mb-3">
-                                    <label asp-for="Loads[i].Products[j].Quantity"></label>
-                                    <input asp-for="Loads[i].Products[j].Quantity" class="form-control" type="number" />
-                                    <span asp-validation-for="Loads[i].Products[j].Quantity" class="text-danger"></span>
-                                </div>
-                                    <div class="col-md-3  form-group mb-3">
-                                    <label asp-for="Loads[i].Products[j].Weight"></label>
-                                    <input asp-for="Loads[i].Products[j].Weight" class="form-control" type="number" />
-                                    <span asp-validation-for="Loads[i].Products[j].Weight" class="text-danger"></span>
-                                </div>
-                                <div class="col-md-1">
-                                    <label>&nbsp;</label>
-                                    <button type="button" class="btn btn-sm btn-outline-danger remove-product-btn">X</button>
-                                </div>
-                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-load-btn">X</button>
                         }
                     </div>
-                        <button type="button" class="btn add-product-btn btn-link text-decoration-none p-0" style="color: var(--primary)">
-                            <i class="fas fa-plus"></i> Add Product
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Loads[i].StartLocation" class="control-label"></label>
+                                    <input asp-for="Loads[i].StartLocation" class="form-control" />
+                                    <span asp-validation-for="Loads[i].StartLocation" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Loads[i].Destination" class="control-label"></label>
+                                    <input asp-for="Loads[i].Destination" class="form-control" />
+                                    <span asp-validation-for="Loads[i].Destination" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="custom-divider">
+                            <span class="divider-text">Items in this Load</span>
+                        </div>
+                        <div class="load-items-container" data-load-index="@i">
+                            @for (var j = 0; j < Model.Loads[i].LoadItems.Count; j++)
+                            {
+                                <div class="row load-item-entry align-items-center">
+                                    <div class="col-md-5 form-group mb-3">
+                                        <label asp-for="Loads[i].LoadItems[j].ItemType"></label>
+                                        <input asp-for="Loads[i].LoadItems[j].ItemType" class="form-control" placeholder="e.g., Furniture, Boxes" />
+                                        <span asp-validation-for="Loads[i].LoadItems[j].ItemType" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-3 form-group mb-3">
+                                        <label asp-for="Loads[i].LoadItems[j].Quantity"></label>
+                                        <input asp-for="Loads[i].LoadItems[j].Quantity" class="form-control" type="number" value="1" />
+                                        <span asp-validation-for="Loads[i].LoadItems[j].Quantity" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-3 form-group mb-3">
+                                        <label asp-for="Loads[i].LoadItems[j].Note"></label>
+                                        <input asp-for="Loads[i].LoadItems[j].Note" class="form-control" type="text" placeholder="e.g., Fragile, Heavy" />
+                                        <span asp-validation-for="Loads[i].LoadItems[j].Note" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <label>&nbsp;</label>
+                                        @if (Model.Loads[i].LoadItems.Count > 1)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-load-item-btn">X</button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <button type="button" class="btn add-load-item-btn btn-link text-decoration-none p-0" style="color: var(--primary)">
+                            <i class="fas fa-plus"></i> Add Item
                         </button>
+                    </div>
                 </div>
-            </div>
-        }
-    </div>
-    <div class="mt-3 mb-4">
+            }
+        </div>
+        <div class="mt-3 mb-4">
             <button id="add-load-btn" type="button" class="btn btn-link text-decoration-none p-0" style="color: var(--primary)">
                 <i class="fas fa-plus"></i> Add Load
             </button>
-
+        </div>
     </div>
- </div>
 
-    @* STEP 3: REVIEW & SUBMIT *@
     <div id="step-3" class="step-content">
         <h4>Job Summary</h4>
         <div id="review-content">
@@ -152,12 +139,11 @@
 
     <div class="navigation-buttons">
         <button type="button" id="prevBtn" class="btn btn-outline">Back</button>
-        <div></div>
+        <button type="button" id="cancelBtn" class="btn btn-outline" onclick="window.location.href='@Url.Action("Index")'">Cancel</button>
         <button type="button" id="nextBtn" class="btn btn-primary">Next</button>
         <button type="submit" id="submitBtn" class="btn btn-primary">Submit</button>
     </div>
 </form>
-
 
 @section Scripts {
     @{
@@ -166,56 +152,48 @@
     <script>
         $(document).ready(function () {
             var currentStep = 1;
-            var totalSteps = 3; // Number of step-content divs
+            var totalSteps = 3;
 
-             const stepTitles = {
+            const stepTitles = {
                 1: "Add Loads",
                 2: "Review & Submit",
-                3: "Submit" // No "Next" on the last step, but for completeness
+                3: "Submit"
             };
 
-            // Generate the <option> tags for Transport Units once on the server.
-            var transportUnitsOptionsHtml = '';
-            @if (transportUnits != null)
-            {
-                    foreach (var item in transportUnits)
-                    {
-                            @:transportUnitsOptionsHtml += '<option value="@item.Value">@Html.Raw(item.Text)</option>';
-                    }
-            }
-
-            // --- NAVIGATION FUNCTIONS ---
             function showStep(stepNumber) {
-                $('.step-content').removeClass('active').hide(); // Hide all step contents
-                $(`#step-${stepNumber}`).addClass('active').show(); // Show current step content
+                $('.step-content').removeClass('active').hide();
+                $(`#step-${stepNumber}`).addClass('active').show();
 
-                $('.step-indicator .step').removeClass('active completed'); // Reset indicator classes
+                $('.step-indicator .step').removeClass('active completed');
                 for (let i = 1; i <= totalSteps; i++) {
                     let stepElement = $(`.step-indicator .step[data-step="${i}"]`);
                     if (i < stepNumber) {
-                        stepElement.addClass('completed'); // Mark previous steps as completed
+                        stepElement.addClass('completed');
                     } else if (i === stepNumber) {
-                        stepElement.addClass('active'); // Mark current step as active
+                        stepElement.addClass('active');
                     }
                 }
 
-                // Update navigation buttons visibility
-                $('#prevBtn').toggle(stepNumber > 1);
+                // Show/hide navigation buttons based on step
+                if (stepNumber === 1) {
+                    $('#prevBtn').hide();
+                    $('#cancelBtn').show();
+                } else {
+                    $('#prevBtn').show();
+                    $('#cancelBtn').hide();
+                }
                 $('#nextBtn').toggle(stepNumber < totalSteps);
                 $('#submitBtn').toggle(stepNumber === totalSteps);
 
-                // Re-enable client-side validation for the current step's elements
-                 if (stepNumber < totalSteps) {
+                if (stepNumber < totalSteps) {
                     $('#nextBtn').text('Next: ' + stepTitles[stepNumber]);
                 }
                 reparseFormValidation();
             }
 
-            // --- VALIDATION HELPERS ---
             function isValidStep(stepNumber) {
                 let isValid = true;
                 $(`#step-${stepNumber} input, #step-${stepNumber} select, #step-${stepNumber} textarea`).each(function () {
-                    // Trigger validation for each field in the current step
                     $(this).valid();
                     if (!$(this).valid()) {
                         isValid = false;
@@ -225,14 +203,12 @@
             }
 
             function reparseFormValidation() {
-                // This ensures newly added elements get client-side validation rules
                 var form = $('form');
                 form.removeData('validator');
                 form.removeData('unobtrusiveValidation');
                 $.validator.unobtrusive.parse(form);
             }
 
-            // --- REVIEW STEP POPULATION ---
             function populateReviewStep() {
                 let reviewHtml = '<h5>Job Details</h5>';
                 reviewHtml += `<p><strong>Job Title:</strong> ${$('#JobTitle').val()}</p>`;
@@ -240,7 +216,7 @@
                 reviewHtml += `<p><strong>Description:</strong> ${$('#Description').val()}</p>`;
                 reviewHtml += `<p><strong>Priority:</strong> ${$('#Priority option:selected').text()}</p>`;
 
-                reviewHtml += '<hr><h5>Loads & Products</h5>';
+                reviewHtml += '<hr><h5>Loads & Items</h5>';
                 if ($('#loads-container .load-entry').length === 0) {
                     reviewHtml += '<p>No loads added.</p>';
                 } else {
@@ -249,22 +225,21 @@
                         reviewHtml += `<h6>Load #${loadIndex + 1}</h6>`;
                         reviewHtml += `<p><strong>Start Location:</strong> ${$(loadElement).find(`[name="Loads[${loadIndex}].StartLocation"]`).val()}</p>`;
                         reviewHtml += `<p><strong>Destination:</strong> ${$(loadElement).find(`[name="Loads[${loadIndex}].Destination"]`).val()}</p>`;
-                        reviewHtml += `<p><strong>Transport Unit:</strong> ${$(loadElement).find(`[name="Loads[${loadIndex}].TransportUnitId"] option:selected`).text()}</p>`;
 
-                        reviewHtml += `<h6>Products:</h6>`;
-                        let productCount = 0;
-                        $(loadElement).find('.product-entry').each(function (productIndex, productElement) {
-                            const productName = $(productElement).find(`[name="Loads[${loadIndex}].Products[${productIndex}].Name"]`).val();
-                            const productQuantity = $(productElement).find(`[name="Loads[${loadIndex}].Products[${productIndex}].Quantity"]`).val();
-                            const productWeight = $(productElement).find(`[name="Loads[${loadIndex}].Products[${productIndex}].Weight"]`).val();
+                        reviewHtml += `<h6>Items:</h6>`;
+                        let itemCount = 0;
+                        $(loadElement).find('.load-item-entry').each(function (itemIndex, itemElement) {
+                            const itemType = $(itemElement).find(`[name="Loads[${loadIndex}].LoadItems[${itemIndex}].ItemType"]`).val();
+                            const itemQuantity = $(itemElement).find(`[name="Loads[${loadIndex}].LoadItems[${itemIndex}].Quantity"]`).val();
+                            const itemNote = $(itemElement).find(`[name="Loads[${loadIndex}].LoadItems[${itemIndex}].Note"]`).val();
 
-                            if (productName || productQuantity || productWeight) { // Only show if at least one field has content
-                                reviewHtml += `<p class="mb-0 ms-3">- <strong>${productName}</strong> (Qty: ${productQuantity}, Wt: ${productWeight}kg)</p>`;
-                                productCount++;
+                            if (itemType || itemQuantity || itemNote) {
+                                reviewHtml += `<p class="mb-0 ms-3">- <strong>${itemType}</strong> (Qty: ${itemQuantity}, Note: ${itemNote})</p>`;
+                                itemCount++;
                             }
                         });
-                        if (productCount === 0) {
-                             reviewHtml += `<p class="mb-0 ms-3">No products specified for this load.</p>`;
+                        if (itemCount === 0) {
+                            reviewHtml += `<p class="mb-0 ms-3">No items specified for this load.</p>`;
                         }
                         reviewHtml += `</div></div>`;
                     });
@@ -272,16 +247,14 @@
                 $('#review-content').html(reviewHtml);
             }
 
-
-            // --- EVENT HANDLERS ---
             $('#nextBtn').click(function () {
                 if (isValidStep(currentStep)) {
                     currentStep++;
                     if (currentStep > totalSteps) {
-                        currentStep = totalSteps; // Stay on the last step
+                        currentStep = totalSteps;
                     }
                     if (currentStep === totalSteps) {
-                        populateReviewStep(); // Populate review data before showing last step
+                        populateReviewStep();
                     }
                     showStep(currentStep);
                 }
@@ -290,22 +263,18 @@
             $('#prevBtn').click(function () {
                 currentStep--;
                 if (currentStep < 1) {
-                    currentStep = 1; // Stay on the first step
+                    currentStep = 1;
                 }
                 showStep(currentStep);
             });
 
-            // Clickable step indicator for navigation
             $('.step-indicator .step').click(function() {
                 let clickedStep = parseInt($(this).data('step'));
-                // Allow direct navigation to previous/current completed steps
                 if (clickedStep < currentStep) {
                     currentStep = clickedStep;
                     showStep(currentStep);
                 } else if (clickedStep === currentStep) {
-                    // Do nothing if clicking current step
                 } else if (clickedStep > currentStep && isValidStep(currentStep)) {
-                    // Allow moving forward if current step is valid, otherwise stay
                     currentStep = clickedStep;
                     if (currentStep === totalSteps) {
                         populateReviewStep();
@@ -314,12 +283,15 @@
                 }
             });
 
-
-            // --- RE-INDEXING (existing dynamic form part) ---
             function reindexAll() {
+                // First remove validation data
+                $('.load-entry input, .load-entry select').each(function() {
+                    $(this).removeData("validator").removeData("unobtrusiveValidation");
+                });
+
                 $('.load-entry').each(function (loadIndex, loadElement) {
                     $(loadElement).find('.load-title').text('Load #' + (loadIndex + 1));
-                    $(loadElement).find('.products-container').attr('data-load-index', loadIndex);
+                    $(loadElement).find('.load-items-container').attr('data-load-index', loadIndex);
 
                     $(loadElement).find('input, select, textarea, span[data-valmsg-for]').each(function () {
                         var originalName = $(this).attr('name') || $(this).attr('data-valmsg-for');
@@ -329,7 +301,8 @@
                                 $(this).attr('name', newName);
                                 var originalId = $(this).attr('id');
                                 if (originalId) {
-                                    $(this).attr('id', newIdFromOldName(originalId, newName));
+                                    var newId = newIdFromOldName(originalId, newName);
+                                    $(this).attr('id', newId);
                                 }
                             } else if ($(this).is('span')) {
                                 $(this).attr('data-valmsg-for', newName);
@@ -337,19 +310,20 @@
                         }
                     });
 
-                    $(loadElement).find('.product-entry').each(function (productIndex, productElement) {
-                        $(productElement).find('input, span[data-valmsg-for]').each(function () {
+                    $(loadElement).find('.load-item-entry').each(function (itemIndex, itemElement) {
+                        $(itemElement).find('input, span[data-valmsg-for]').each(function () {
                             var originalName = $(this).attr('name') || $(this).attr('data-valmsg-for');
                             if (originalName) {
                                 var newName = originalName
                                     .replace(/Loads\[\d+\]/, 'Loads[' + loadIndex + ']')
-                                    .replace(/Products\[\d+\]/, 'Products[' + productIndex + ']');
+                                    .replace(/LoadItems\[\d+\]/, 'LoadItems[' + itemIndex + ']');
 
                                 if ($(this).is('input')) {
                                     $(this).attr('name', newName);
                                     var originalId = $(this).attr('id');
                                     if (originalId) {
-                                        $(this).attr('id', newIdFromOldName(originalId, newName));
+                                        var newId = newIdFromOldName(originalId, newName);
+                                        $(this).attr('id', newId);
                                     }
                                 } else if ($(this).is('span')) {
                                     $(this).attr('data-valmsg-for', newName);
@@ -358,54 +332,89 @@
                         });
                     });
                 });
-                reparseFormValidation(); // Re-enable validation after re-indexing
+
+                // Reparse validation on the entire form
+                var form = $('form');
+                form.removeData("validator");
+                form.removeData("unobtrusiveValidation");
+                $.validator.unobtrusive.parse(form);
             }
 
             function newIdFromOldName(oldId, newName) {
                 return newName.replace(/\[/g, '_').replace(/\]/g, '__').replace(/\./g, '_');
             }
 
+            function updateRemoveButtons() {
+                // Update load remove buttons
+                $('.load-entry').each(function() {
+                    const removeBtn = $(this).find('.remove-load-btn');
+                    if ($('.load-entry').length > 1) {
+                        if (removeBtn.length === 0) {
+                            $(this).find('.card-header').append('<button type="button" class="btn btn-sm btn-outline-danger remove-load-btn">X</button>');
+                        }
+                    } else {
+                        removeBtn.remove();
+                    }
+                });
 
-            // --- ADD PRODUCT to a specific load ---
-            $(document).on('click', '.add-product-btn', function () {
-                var productsContainer = $(this).prev('.products-container');
-                var loadIndex = productsContainer.data('load-index');
-                var productIndex = productsContainer.find('.product-entry').length;
+                // Update item remove buttons
+                $('.load-items-container').each(function() {
+                    const items = $(this).find('.load-item-entry');
+                    items.each(function() {
+                        const removeBtn = $(this).find('.remove-load-item-btn');
+                        if (items.length > 1) {
+                            if (removeBtn.length === 0) {
+                                $(this).find('.col-md-1').append('<button type="button" class="btn btn-sm btn-outline-danger remove-load-item-btn">X</button>');
+                            }
+                        } else {
+                            removeBtn.remove();
+                        }
+                    });
+                });
+            }
 
-                var newProductHtml = `
-                <div class="row product-entry align-items-center">
+            $(document).on('click', '.add-load-item-btn', function () {
+                var loadItemsContainer = $(this).prev('.load-items-container');
+                var loadIndex = loadItemsContainer.data('load-index');
+                var itemIndex = loadItemsContainer.find('.load-item-entry').length;
+
+                var newLoadItemHtml = `
+                <div class="row load-item-entry align-items-center">
                     <div class="col-md-5 form-group mb-3">
-                        <label>Product Name</label>
-                        <input class="form-control" type="text" name="Loads[${loadIndex}].Products[${productIndex}].Name" placeholder="Product Name" />
-                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].Products[${productIndex}].Name" data-valmsg-replace="true"></span>
+                        <label>Item Type</label>
+                        <input class="form-control" type="text" name="Loads[${loadIndex}].LoadItems[${itemIndex}].ItemType" data-val="true" data-val-required="The Item Type field is required" placeholder="e.g., Furniture, Boxes" />
+                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[${itemIndex}].ItemType" data-valmsg-replace="true"></span>
                     </div>
                     <div class="col-md-3 form-group mb-3">
                         <label>Quantity</label>
-                        <input class="form-control" type="number" name="Loads[${loadIndex}].Products[${productIndex}].Quantity" value="1" />
-                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].Products[${productIndex}].Quantity" data-valmsg-replace="true"></span>
+                        <input class="form-control" type="number" name="Loads[${loadIndex}].LoadItems[${itemIndex}].Quantity" data-val="true" data-val-required="The Quantity field is required" data-val-number="The field Quantity must be a number" value="1" />
+                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[${itemIndex}].Quantity" data-valmsg-replace="true"></span>
                     </div>
                     <div class="col-md-3 form-group mb-3">
-                        <label>Weight</label>
-                        <input class="form-control" type="number" name="Loads[${loadIndex}].Products[${productIndex}].Weight" value="0" placeholder="Weight" />
-                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].Products[${productIndex}].Weight" data-valmsg-replace="true"></span>
+                        <label>Note</label>
+                        <input class="form-control" type="text" name="Loads[${loadIndex}].LoadItems[${itemIndex}].Note" placeholder="e.g., Fragile, Heavy" />
+                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[${itemIndex}].Note" data-valmsg-replace="true"></span>
                     </div>
                     <div class="col-md-1">
                         <label>&nbsp;</label>
-                        <button type="button" class="btn btn-sm btn-outline-danger remove-product-btn">X</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-load-item-btn">X</button>
                     </div>
                 </div>`;
 
-                productsContainer.append(newProductHtml);
-                reindexAll(); // Reindex to ensure validation rules are picked up for new elements
-            });
-
-            // --- REMOVE PRODUCT from a load ---
-            $(document).on('click', '.remove-product-btn', function () {
-                $(this).closest('.product-entry').remove();
+                loadItemsContainer.append(newLoadItemHtml);
                 reindexAll();
+                updateRemoveButtons();
             });
 
-            // --- ADD LOAD ---
+            $(document).on('click', '.remove-load-item-btn', function () {
+                const loadItemsContainer = $(this).closest('.load-items-container');
+                if (loadItemsContainer.find('.load-item-entry').length > 1) {
+                    $(this).closest('.load-item-entry').remove();
+                    reindexAll();
+                    updateRemoveButtons();
+                }
+            });
+
             $("#add-load-btn").click(function () {
                 var loadsContainer = $('#loads-container');
                 var loadIndex = loadsContainer.find('.load-entry').length;
@@ -414,79 +423,74 @@
                 <div class="card mb-3 load-entry">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="load-title mb-0">Load #${loadIndex + 1}</h5>
-                        <button type="button" class="btn btn-sm btn-danger remove-load-btn">Remove Load</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-load-btn">X</button>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label>Start Location</label>
-                                    <input class="form-control" type="text" name="Loads[${loadIndex}].StartLocation" placeholder="Start Location" />
+                                    <input class="form-control" type="text" name="Loads[${loadIndex}].StartLocation" data-val="true" data-val-required="The Start Location field is required" placeholder="Start Location" />
                                     <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].StartLocation" data-valmsg-replace="true"></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label>Destination</label>
-                                    <input class="form-control" type="text" name="Loads[${loadIndex}].Destination" placeholder="Destination" />
+                                    <input class="form-control" type="text" name="Loads[${loadIndex}].Destination" data-val="true" data-val-required="The Destination field is required" placeholder="Destination" />
                                     <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].Destination" data-valmsg-replace="true"></span>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group mb-3">
-                            <label>Transport Unit</label>
-                            <select class="form-control" name="Loads[${loadIndex}].TransportUnitId">
-                                <option value="">-- Select Transport Unit --</option>
-                                ${transportUnitsOptionsHtml}
-                            </select>
-                            <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].TransportUnitId" data-valmsg-replace="true"></span>
-                        </div>
 
-                         <div class="custom-divider">
-                            <span class="divider-text">Products in this Load</span>
+                        <div class="custom-divider">
+                            <span class="divider-text">Items in this Load</span>
                         </div>
-                        <div class="products-container" data-load-index="${loadIndex}">
-                            <div class="row product-entry align-items-center">
+                        <div class="load-items-container" data-load-index="${loadIndex}">
+                            <div class="row load-item-entry align-items-center">
                                 <div class="col-md-5 form-group mb-3">
-                                    <label>Product Name</label>
-                                    <input class="form-control" type="text" name="Loads[${loadIndex}].Products[0].Name" placeholder="Product Name" />
-                                    <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].Products[0].Name" data-valmsg-replace="true"></span>
+                                    <label>Item Type</label>
+                                    <input class="form-control" type="text" name="Loads[${loadIndex}].LoadItems[0].ItemType" data-val="true" data-val-required="The Item Type field is required" placeholder="e.g., Furniture, Boxes" />
+                                    <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[0].ItemType" data-valmsg-replace="true"></span>
                                 </div>
                                 <div class="col-md-3 form-group mb-3">
                                     <label>Quantity</label>
-                                    <input class="form-control" type="number" name="Loads[${loadIndex}].Products[0].Quantity" value="1" />
-                                    <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].Products[0].Quantity" data-valmsg-replace="true"></span>
+                                    <input class="form-control" type="number" name="Loads[${loadIndex}].LoadItems[0].Quantity" data-val="true" data-val-required="The Quantity field is required" data-val-number="The field Quantity must be a number" value="1" />
+                                    <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[0].Quantity" data-valmsg-replace="true"></span>
                                 </div>
                                 <div class="col-md-3 form-group mb-3">
-                                    <label>Weight</label>
-                                    <input class="form-control" type="number" name="Loads[${loadIndex}].Products[0].Weight" value="0" placeholder="Weight" />
-                                    <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].Products[0].Weight" data-valmsg-replace="true"></span>
+                                    <label>Note</label>
+                                    <input class="form-control" type="text" name="Loads[${loadIndex}].LoadItems[0].Note" placeholder="e.g., Fragile, Heavy" />
+                                    <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[0].Note" data-valmsg-replace="true"></span>
                                 </div>
                                 <div class="col-md-1">
                                     <label>&nbsp;</label>
-                                    <button type="button" class="btn btn-sm btn-outline-danger remove-product-btn">X</button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-load-item-btn">X</button>
                                 </div>
                             </div>
                         </div>
-                       <button type="button" class="btn add-product-btn btn-link text-decoration-none p-0" style="color: var(--primary)">
-                            <i class="fas fa-plus"></i> Add Product
+                        <button type="button" class="btn add-load-item-btn btn-link text-decoration-none p-0" style="color: var(--primary)">
+                            <i class="fas fa-plus"></i> Add Item
                         </button>
                     </div>
                 </div>`;
 
                 loadsContainer.append(newLoadHtml);
                 reindexAll();
+                updateRemoveButtons();
             });
 
-            // --- REMOVE LOAD ---
             $(document).on('click', '.remove-load-btn', function () {
-                $(this).closest('.load-entry').remove();
-                reindexAll();
+                if ($('.load-entry').length > 1) {
+                    $(this).closest('.load-entry').remove();
+                    reindexAll();
+                    updateRemoveButtons();
+                }
             });
 
-            // Initial display: Show the first step
             showStep(currentStep);
-            reindexAll(); // Ensure initial re-indexing applies to any pre-existing loads/products in the model
+            reindexAll();
+            updateRemoveButtons();
         });
     </script>
 }

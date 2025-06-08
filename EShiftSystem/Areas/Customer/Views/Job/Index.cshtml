@@ -1,8 +1,25 @@
-﻿@{
+﻿@model IEnumerable<EShiftSystem.Models.Job>
+@using EShiftSystem.Models.Enums
+@{
     Layout = "~/Views/Shared/_Layout.cshtml";
-}
 
-@model IEnumerable<EShiftSystem.Models.Job>
+    string GetPriorityClass(JobPriority priority) => priority switch
+    {
+        JobPriority.Urgent => "danger",
+        JobPriority.High => "warning",
+        JobPriority.Normal => "info",
+        _ => "secondary"
+    };
+
+    string GetStatusClass(JobStatus status) => status switch
+    {
+        JobStatus.Pending => "warning",
+        JobStatus.InProgress => "primary",
+        JobStatus.Completed => "success",
+        JobStatus.Cancelled => "danger",
+        _ => "secondary"
+    };
+}
 
 <div class="content-header">
     <h2>Jobs</h2>
@@ -29,19 +46,18 @@
             <tr>
                 <td>@job.JobTitle</td>
                 <td>@job.JobDate.ToShortDateString()</td>
-                <td>@job.Priority</td>
-                <td>@job.Status</td>
+                <td>
+                    <span class="badge bg-@GetPriorityClass(job.Priority)">@job.Priority</span>
+                </td>
+                <td>
+                    <span class="badge bg-@GetStatusClass(job.Status)">@job.Status</span>
+                </td>
                 <td>@job.CreatedAt.ToShortDateString()</td>
                 <td>
-                    <a class="btn btn-sm btn-outline-primary me-2" asp-action="Details" asp-route-id="@job.JobId" title="Details">
-                        <i class="fas fa-eye"></i>
+                    <a class="btn btn-outline" asp-action="Details" asp-route-id="@job.JobId" title="Details" style="padding: 6px 14px">
+                        <i class="fas fa-eye"></i> View
                     </a>
-                    <a class="btn btn-sm btn-outline-secondary me-2" asp-action="Edit" asp-route-id="@job.JobId" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@job.JobId" title="Delete">
-                        <i class="fas fa-trash-alt"></i>
-                    </a>
+                  
                 </td>
             </tr>
         }
