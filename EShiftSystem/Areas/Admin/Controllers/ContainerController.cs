@@ -19,7 +19,15 @@ namespace EShiftSystem.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Containers.ToListAsync());
+            try
+            {
+                return View(await _context.Containers.ToListAsync());
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while loading containers: " + ex.Message;
+                return View(new List<Container>());
+            }
         }
 
         public IActionResult Create()
@@ -31,70 +39,140 @@ namespace EShiftSystem.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Container container)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(container);
-                await _context.SaveChangesAsync();
+                if (ModelState.IsValid)
+                {
+                    _context.Add(container);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = $"Container '{container.Type}' has been created successfully.";
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(container);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while creating the container: " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }
-            return View(container);
         }
 
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            try
+            {
+                if (id == null)
+                {
+                    TempData["ErrorMessage"] = "Container ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            var container = await _context.Containers.FindAsync(id);
-            if (container == null) return NotFound();
+                var container = await _context.Containers.FindAsync(id);
+                if (container == null)
+                {
+                    TempData["ErrorMessage"] = "Container not found.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            return View(container);
+                return View(container);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while loading the container: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Container container)
         {
-            if (id != container.ContainerId) return NotFound();
-
-            if (ModelState.IsValid)
+            try
             {
-                try
+                if (id != container.ContainerId)
                 {
-                    _context.Update(container);
-                    await _context.SaveChangesAsync();
+                    TempData["ErrorMessage"] = "Invalid container ID.";
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+
+                if (ModelState.IsValid)
                 {
-                    if (!ContainerExists(container.ContainerId)) return NotFound();
-                    throw;
+                    try
+                    {
+                        _context.Update(container);
+                        await _context.SaveChangesAsync();
+                        TempData["SuccessMessage"] = $"Container '{container.Type}' has been updated successfully.";
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!ContainerExists(container.ContainerId))
+                        {
+                            TempData["ErrorMessage"] = "Container no longer exists.";
+                            return RedirectToAction(nameof(Index));
+                        }
+                        throw;
+                    }
+                    return RedirectToAction(nameof(Index));
                 }
+                return View(container);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while updating the container: " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }
-            return View(container);
         }
 
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
+            try
+            {
+                if (id == null)
+                {
+                    TempData["ErrorMessage"] = "Container ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            var container = await _context.Containers
-                .FirstOrDefaultAsync(m => m.ContainerId == id);
-            if (container == null) return NotFound();
+                var container = await _context.Containers
+                    .FirstOrDefaultAsync(m => m.ContainerId == id);
+                if (container == null)
+                {
+                    TempData["ErrorMessage"] = "Container not found.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            return View(container);
+                return View(container);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while loading the container: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var container = await _context.Containers.FindAsync(id);
-            if (container != null)
+            try
             {
+                var container = await _context.Containers.FindAsync(id);
+                if (container == null)
+                {
+                    TempData["ErrorMessage"] = "Container not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 _context.Containers.Remove(container);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Container '{container.Type}' has been deleted successfully.";
+                return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index));
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while deleting the container: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         private bool ContainerExists(int id)

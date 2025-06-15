@@ -21,6 +21,82 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .notification {
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease-out;
+            background: white;
+            border-left: 4px solid;
+        }
+
+        .success-notification {
+            border-left-color: #28a745;
+            color: #155724;
+            background-color: #d4edda;
+        }
+
+        .error-notification {
+            border-left-color: #dc3545;
+            color: #721c24;
+            background-color: #f8d7da;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+            margin-left: auto;
+        }
+
+        .notification-close:hover {
+            opacity: 0.7;
+        }
+
+        @@keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @@keyframes fadeOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .notification.fade-out {
+            animation: fadeOut 0.3s ease-in forwards;
+        }
+    </style>
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
@@ -67,6 +143,12 @@
                 @if (isAdmin)
                 {
                     <li>
+                        <a asp-area="Admin" asp-controller="Job" asp-action="Index"
+                           class="@(currentController == "Job" ? "active" : "")">
+                            <i class="fas fa-list"></i> Jobs
+                        </a>
+                    </li>
+                    <li>
                         <a asp-area="Admin" asp-controller="Lorry" asp-action="Index"
                            class="@(currentController == "Lorry" ? "active" : "")"
                         >
@@ -102,6 +184,7 @@
                             <i class="fas fa-dolly"></i> Transport Units
                         </a>
                     </li>
+                    
                 }
                 @if (isCustomer)
                 {
@@ -138,9 +221,29 @@
         <!-- Main content -->
         <div class="d-flex body-container" style="width: 100%">
             <div class="flex-grow-1">
-                <main role="main" class="content">
-                    @RenderBody()
-                </main>
+                <div class="main-content">
+                    <div id="notification-container" class="notification-container">
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="notification success-notification">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <span>@TempData["SuccessMessage"]</span>
+                                <button type="button" class="notification-close" onclick="this.parentElement.remove();">×</button>
+                            </div>
+                        }
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="notification error-notification">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <span>@TempData["ErrorMessage"]</span>
+                                <button type="button" class="notification-close" onclick="this.parentElement.remove();">×</button>
+                            </div>
+                        }
+                    </div>
+                    <main role="main" class="content">
+                        @RenderBody()
+                    </main>
+                </div>
             </div>
             @* <footer class=" footer text-muted">
                 <div class="container">
@@ -162,5 +265,126 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+    
+    <script>
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
+
+    @section Styles {
+        <style>
+            .notification-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                max-width: 400px;
+            }
+
+            .notification {
+                padding: 15px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease-out;
+                background: white;
+                border-left: 4px solid;
+            }
+
+            .success-notification {
+                border-left-color: #28a745;
+                color: #155724;
+                background-color: #d4edda;
+            }
+
+            .error-notification {
+                border-left-color: #dc3545;
+                color: #721c24;
+                background-color: #f8d7da;
+            }
+
+            .notification-close {
+                background: none;
+                border: none;
+                color: inherit;
+                font-size: 20px;
+                cursor: pointer;
+                padding: 0 5px;
+                margin-left: auto;
+            }
+
+            .notification-close:hover {
+                opacity: 0.7;
+            }
+
+            @@keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            @@keyframes fadeOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+
+            .notification.fade-out {
+                animation: fadeOut 0.3s ease-in forwards;
+            }
+        </style>
+    }
+
+    @section Scripts {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const notifications = document.querySelectorAll('.notification');
+                
+                notifications.forEach(function(notification) {
+                    // Auto-hide after 5 seconds
+                    setTimeout(function() {
+                        notification.classList.add('fade-out');
+                        setTimeout(function() {
+                            notification.remove();
+                        }, 500);
+                    }, 5000);
+
+                    // Close button handler
+                    const closeButton = notification.querySelector('.notification-close');
+                    if (closeButton) {
+                        closeButton.addEventListener('click', function() {
+                            notification.classList.add('fade-out');
+                            setTimeout(function() {
+                                notification.remove();
+                            }, 500);
+                        });
+                    }
+                });
+            });
+        </script>
+    }
 </body>
 </html>

@@ -18,6 +18,12 @@ html,.btn {
     font-size: 14px;
     font-family: 'Poppins', sans-serif;
 }
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
 /*
 @media (min-width: 768px) {
     html, .btn {
@@ -53,6 +59,20 @@ body {
 .btn-primary {
     background-color: var(--primary);
     color: white;
+}
+
+.btn-lg {
+    padding: 15px 30px !important;
+    font-size: 1.1rem !important;
+}
+
+.btn-secondary {
+    background-color: var(--secondary);
+    color: var(--white);
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-dark);
 }
 
 /*.btn {
@@ -405,5 +425,3 @@ h1, h2, h3, h4, h5, h6 {
     color: #6c757d;
     font-size: 0.9rem;
 }
-
-</style

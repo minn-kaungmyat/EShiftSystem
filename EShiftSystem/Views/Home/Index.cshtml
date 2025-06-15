@@ -4,8 +4,131 @@
 @{
     Layout = "/Views/Shared/_HomeLayout.cshtml";
 }
+@* Hero Section *@
+<section class="hero">
+    <div class="container">
+         <div class="hero-content">
+        <h1>Streamline Your <span>Transport Operations</span> With e-Shift</h1>
+        <p>An all-in-one transport management system that helps businesses efficiently manage loads, track shipments, and optimize delivery operations.</p>
+        <div class="hero-btns">
+            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-secondary btn-lg">Get Started</a>
+            <a href="#how-it-works" class="btn btn-outline btn-lg" style="background: transparent; color: white; border-color: white; margin-left: 15px;">Learn More</a>
+        </div>
+    </div>
+    <img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&amp;fit=crop&amp;q=80&amp;w=500&amp;h=400" alt="Transport Management Illustration" class="hero-image" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+    </div>
+    <div class="scroll-down" id="scroll-down">
+            <i class="fas fa-chevron-down"></i>
+    </div>
+</section>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@* Features Section *@
+<section id="features" class="features section">
+    <div class="container">
+        <div class="section-title text-center">
+            <h2>Key Features</h2>
+            <p>Discover how e-Shift can transform your transport management process</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-truck"></i></div>
+                <h2>Fleet Management</h2>
+                <p>Efficiently manage your entire fleet of vehicles, monitor maintenance schedules, and optimize vehicle utilization.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-route"></i></div>
+                <h2>Real-time Tracking</h2>
+                <p>Track your shipments in real-time with advanced GPS integration and get accurate ETAs for all deliveries.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-clipboard-check"></i></div>
+                <h2>Job Management</h2>
+                <p>Create, assign, and monitor transport jobs from a single dashboard with our intuitive job management system.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h2>Analytics & Reports</h2>
+                <p>Gain valuable insights with comprehensive analytics and generate detailed reports for better decision making.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                <h2>Mobile Access</h2>
+                <p>Access e-Shift from anywhere using our mobile-friendly interface, perfect for drivers and on-the-go management.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-user-shield"></i></div>
+                <h2>Secure & Reliable</h2>
+                <p>Rest assured with our enterprise-grade security features protecting your valuable transport data at all times.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@* How It Works Section *@
+<section id="how-it-works" class="how-it-works section">
+    <div class="container">
+        <div class="section-title text-center">
+                <h2>How It Works</h2>
+                <p>Get started with e-Shift in three simple steps</p>
+        </div>
+        <div class="step-container">
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-user-plus"></i>
+                        <div class="step-number">1</div>
+                    </div>
+                    <h3>Create Account</h3>
+                    <p>Sign up and set up your company profile in minutes</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-truck-loading"></i>
+                        <div class="step-number">2</div>
+                    </div>
+                    <h3>Add Jobs</h3>
+                    <p>Create transport jobs and assign to available units</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <div class="step-number">3</div>
+                    </div>
+                    <h3>Track &amp; Manage</h3>
+                    <p>Monitor your shipments in real-time until delivery</p>
+                </div>
+            </div>
+    </div>
+</section>
+
+@* Testimonials Section *@
+<section id="testimonials" class="testimonials section">
+    <div class="container">
+        <div class="section-title text-center">
+            <h2>Client Testimonials</h2>
+            <p>What our customers say about e-Shift</p>
+        </div>
+        <div class="testimonial-carousel">
+            <div class="testimonial-slide">
+                <div class="testimonial-content">
+                    <p>"e-Shift has completely transformed how we manage our transport operations. The real-time tracking feature has increased our delivery accuracy by 35%, and our customers love the transparency."</p>
+                </div>
+                <div class="testimonial-author">
+                    <span class="author-name">Sarah Johnson</span>
+                    <span class="author-company">LogisTech Solutions</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@* Contact Section *@
+<section id="contact" class="cta section">
+    <div class="container">
+        <h2>Ready to Optimize Your Transport Operations?</h2>
+        <p>Join thousands of businesses already using e-Shift to streamline their transport management processes.</p>
+        <div class="cta-btns">
+            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-secondary btn-lg">Get Started Now</a>
+            <a href="#contact" class="btn btn-outline btn-lg" style="color: white; border-color: white; margin-left: 15px;">Contact Sales</a>
+        </div>
+    </div>
+</section>

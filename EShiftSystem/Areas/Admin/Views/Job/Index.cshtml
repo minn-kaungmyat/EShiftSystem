@@ -1,0 +1,91 @@
+@model IEnumerable<EShiftSystem.Models.Job>
+@using EShiftSystem.Models.Enums
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string GetPriorityClass(JobPriority priority) => priority switch
+    {
+        JobPriority.Urgent => "danger",
+        JobPriority.High => "warning",
+        JobPriority.Normal => "info",
+        _ => "secondary"
+    };
+
+    string GetStatusClass(JobStatus status) => status switch
+    {
+        JobStatus.Pending => "warning",
+        JobStatus.InProgress => "primary",
+        JobStatus.Completed => "success",
+        JobStatus.Cancelled => "danger",
+        _ => "secondary"
+    };
+}
+
+<div class="content-header">
+    <h2>All Jobs</h2>
+</div>
+
+<div >
+    <table >
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Priority</th>
+                <th>Status</th>
+                @* <th>Loads</th> *@
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var job in Model)
+            {
+                <tr>
+                    <td>@job.JobTitle</td>
+                    <td>
+                        <div>@job.Customer?.FullName</div>
+                        <small class="text-muted">@job.Customer?.ApplicationUser?.UserName</small>
+                    </td>
+                    <td>@job.JobDate.ToShortDateString()</td>
+                    <td>
+                        <span class="badge bg-@GetPriorityClass(job.Priority)">@job.Priority</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-@GetStatusClass(job.Status)">@job.Status</span>
+                    </td>
+                    @* <td>
+                        <div class="d-flex flex-column">
+                            @foreach (var load in job.Loads)
+                            {
+                                <div class="mb-1">
+                                    <small>
+                                        @if (load.TransportUnit != null)
+                                        {
+                                            <span class="text-success">
+                                                <i class="fas fa-truck"></i> @load.TransportUnit.Name
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                <i class="fas fa-exclamation-circle"></i> No Unit Assigned
+                                            </span>
+                                        }
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    </td> *@
+                    <td>@job.CreatedAt.ToShortDateString()</td>
+                    <td>
+                        <a class="btn btn-outline" asp-action="Details" asp-route-id="@job.JobId" title="Details">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div> 

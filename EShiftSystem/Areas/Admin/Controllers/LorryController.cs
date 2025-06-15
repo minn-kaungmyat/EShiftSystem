@@ -20,7 +20,15 @@ namespace EShiftSystem.Areas.Admin.Controllers
         // GET: Lorry
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Lorries.ToListAsync());
+            try
+            {
+                return View(await _context.Lorries.ToListAsync());
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while loading lorries: " + ex.Message;
+                return View(new List<Lorry>());
+            }
         }
 
         // GET: Lorry/Create
@@ -34,24 +42,49 @@ namespace EShiftSystem.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Lorry lorry)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(lorry);
-                await _context.SaveChangesAsync();
+                if (ModelState.IsValid)
+                {
+                    _context.Add(lorry);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = $"Lorry '{lorry.LicensePlate}' has been created successfully.";
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(lorry);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while creating the lorry: " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }
-            return View(lorry);
         }
 
         // GET: Lorry/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            try
+            {
+                if (id == null)
+                {
+                    TempData["ErrorMessage"] = "Lorry ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            var lorry = await _context.Lorries.FindAsync(id);
-            if (lorry == null) return NotFound();
+                var lorry = await _context.Lorries.FindAsync(id);
+                if (lorry == null)
+                {
+                    TempData["ErrorMessage"] = "Lorry not found.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            return View(lorry);
+                return View(lorry);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while loading the lorry: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         // POST: Lorry/Edit/5
@@ -59,35 +92,68 @@ namespace EShiftSystem.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Lorry lorry)
         {
-            if (id != lorry.LorryId) return NotFound();
-
-            if (ModelState.IsValid)
+            try
             {
-                try
+                if (id != lorry.LorryId)
                 {
-                    _context.Update(lorry);
-                    await _context.SaveChangesAsync();
+                    TempData["ErrorMessage"] = "Invalid lorry ID.";
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+
+                if (ModelState.IsValid)
                 {
-                    if (!LorryExists(lorry.LorryId)) return NotFound();
-                    throw;
+                    try
+                    {
+                        _context.Update(lorry);
+                        await _context.SaveChangesAsync();
+                        TempData["SuccessMessage"] = $"Lorry '{lorry.LicensePlate}' has been updated successfully.";
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!LorryExists(lorry.LorryId))
+                        {
+                            TempData["ErrorMessage"] = "Lorry no longer exists.";
+                            return RedirectToAction(nameof(Index));
+                        }
+                        throw;
+                    }
+                    return RedirectToAction(nameof(Index));
                 }
+                return View(lorry);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while updating the lorry: " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }
-            return View(lorry);
         }
 
         // GET: Lorry/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
+            try
+            {
+                if (id == null)
+                {
+                    TempData["ErrorMessage"] = "Lorry ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            var lorry = await _context.Lorries
-                .FirstOrDefaultAsync(m => m.LorryId == id);
-            if (lorry == null) return NotFound();
+                var lorry = await _context.Lorries
+                    .FirstOrDefaultAsync(m => m.LorryId == id);
+                if (lorry == null)
+                {
+                    TempData["ErrorMessage"] = "Lorry not found.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            return View(lorry);
+                return View(lorry);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while loading the lorry: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         // POST: Lorry/Delete/5
@@ -95,13 +161,25 @@ namespace EShiftSystem.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var lorry = await _context.Lorries.FindAsync(id);
-            if (lorry != null)
+            try
             {
+                var lorry = await _context.Lorries.FindAsync(id);
+                if (lorry == null)
+                {
+                    TempData["ErrorMessage"] = "Lorry not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 _context.Lorries.Remove(lorry);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Lorry '{lorry.LicensePlate}' has been deleted successfully.";
+                return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index));
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while deleting the lorry: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         private bool LorryExists(int id)

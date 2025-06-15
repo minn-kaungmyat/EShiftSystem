@@ -20,92 +20,178 @@ namespace EShiftSystem.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var assistants = await _context.Assistants
-                .Include(a => a.TransportUnit)
-                .ToListAsync();
-            return View(assistants);
+            try
+            {
+                var assistants = await _context.Assistants
+                    .Include(a => a.TransportUnit)
+                    .ToListAsync();
+                return View(assistants);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while loading assistants: " + ex.Message;
+                return View(new List<Assistant>());
+            }
         }
 
         public IActionResult Create()
         {
-            ViewData["TransportUnitId"] = new SelectList(_context.TransportUnits, "TransportUnitId", "Name");
-            return View();
+            try
+            {
+                ViewData["TransportUnitId"] = new SelectList(_context.TransportUnits, "TransportUnitId", "Name");
+                return View();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while preparing the create form: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Assistant assistant)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(assistant);
-                await _context.SaveChangesAsync();
+                if (ModelState.IsValid)
+                {
+                    _context.Add(assistant);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = $"Assistant '{assistant.Name}' has been created successfully.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                ViewData["TransportUnitId"] = new SelectList(_context.TransportUnits, "TransportUnitId", "Name", assistant.TransportUnitId);
+                return View(assistant);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while creating the assistant: " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }
-
-            //ViewData["TransportUnitId"] = new SelectList(_context.TransportUnits, "TransportUnitId", "Name", assistant.TransportUnitId);
-            return View(assistant);
         }
 
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            try
+            {
+                if (id == null)
+                {
+                    TempData["ErrorMessage"] = "Assistant ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            var assistant = await _context.Assistants.FindAsync(id);
-            if (assistant == null) return NotFound();
+                var assistant = await _context.Assistants.FindAsync(id);
+                if (assistant == null)
+                {
+                    TempData["ErrorMessage"] = "Assistant not found.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            //ViewData["TransportUnitId"] = new SelectList(_context.TransportUnits, "TransportUnitId", "Name", assistant.TransportUnitId);
-            return View(assistant);
+                ViewData["TransportUnitId"] = new SelectList(_context.TransportUnits, "TransportUnitId", "Name", assistant.TransportUnitId);
+                return View(assistant);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while loading the assistant: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Assistant assistant)
         {
-            if (id != assistant.AssistantId) return NotFound();
-
-            if (ModelState.IsValid)
+            try
             {
-                try
+                if (id != assistant.AssistantId)
                 {
-                    _context.Update(assistant);
-                    await _context.SaveChangesAsync();
+                    TempData["ErrorMessage"] = "Invalid assistant ID.";
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+
+                if (ModelState.IsValid)
                 {
-                    if (!AssistantExists(assistant.AssistantId)) return NotFound();
-                    throw;
+                    try
+                    {
+                        _context.Update(assistant);
+                        await _context.SaveChangesAsync();
+                        TempData["SuccessMessage"] = $"Assistant '{assistant.Name}' has been updated successfully.";
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!AssistantExists(assistant.AssistantId))
+                        {
+                            TempData["ErrorMessage"] = "Assistant no longer exists.";
+                            return RedirectToAction(nameof(Index));
+                        }
+                        throw;
+                    }
+                    return RedirectToAction(nameof(Index));
                 }
+
+                ViewData["TransportUnitId"] = new SelectList(_context.TransportUnits, "TransportUnitId", "Name", assistant.TransportUnitId);
+                return View(assistant);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while updating the assistant: " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }
-
-            //ViewData["TransportUnitId"] = new SelectList(_context.TransportUnits, "TransportUnitId", "Name", assistant.TransportUnitId);
-            return View(assistant);
         }
 
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
+            try
+            {
+                if (id == null)
+                {
+                    TempData["ErrorMessage"] = "Assistant ID is required.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            var assistant = await _context.Assistants
-                .Include(a => a.TransportUnit)
-                .FirstOrDefaultAsync(m => m.AssistantId == id);
-            if (assistant == null) return NotFound();
+                var assistant = await _context.Assistants
+                    .Include(a => a.TransportUnit)
+                    .FirstOrDefaultAsync(m => m.AssistantId == id);
+                if (assistant == null)
+                {
+                    TempData["ErrorMessage"] = "Assistant not found.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            return View(assistant);
+                return View(assistant);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while loading the assistant: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var assistant = await _context.Assistants.FindAsync(id);
-            if (assistant != null)
+            try
             {
+                var assistant = await _context.Assistants.FindAsync(id);
+                if (assistant == null)
+                {
+                    TempData["ErrorMessage"] = "Assistant not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 _context.Assistants.Remove(assistant);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Assistant '{assistant.Name}' has been deleted successfully.";
+                return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index));
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while deleting the assistant: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         private bool AssistantExists(int id)
