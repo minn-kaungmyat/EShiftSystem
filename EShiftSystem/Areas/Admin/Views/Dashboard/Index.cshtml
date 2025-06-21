@@ -1,6 +1,219 @@
-﻿@{
-    Layout = "~/Views/Shared/_Layout.cshtml";  // or an Admin-specific layout if you want
+﻿@model dynamic
+@using EShiftSystem.Models.Enums
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    string GetPriorityClass(JobPriority priority) => priority switch
+    {
+        JobPriority.Urgent => "danger",
+        JobPriority.High => "warning",
+        JobPriority.Normal => "info",
+        _ => "secondary"
+    };
+
+    string GetStatusClass(JobStatus status) => status switch
+    {
+        JobStatus.Pending => "warning",
+        JobStatus.Approved => "info",
+        JobStatus.Rejected => "danger",
+        JobStatus.InProgress => "primary",
+        JobStatus.Delivered => "light-success",
+        JobStatus.Completed => "success",
+        JobStatus.Cancelled => "secondary",
+        _ => "secondary"
+    };
 }
 
-<h2>Admin Dashboard</h2>
-<p>Welcome, Admin! This is your dashboard.</p>
+@section Styles {
+    <link rel="stylesheet" href="~/Areas/Admin/Views/Dashboard/Index.cshtml.css" />
+}
+
+<div class="content-header">
+    <h2> Admin Dashboard</h2>
+   
+</div>
+
+<!-- Statistics Cards -->
+<div class="dashboard-stats">
+    <div class="stats-grid">
+        <!-- Job Statistics -->
+        <div class="stat-card">
+            <div class="stat-number">@Model.TotalJobs</div>
+            <div class="stat-label">Total Jobs</div>
+            <div class="stat-detail">@Model.MonthJobs this month</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">@Model.PendingJobs</div>
+            <div class="stat-label">Pending Approval</div>
+            <div class="stat-detail">@Model.TodayJobs created today</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">@Model.InProgressJobs</div>
+            <div class="stat-label">In Progress</div>
+            <div class="stat-detail">Active workload</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">@Model.CompletedJobs</div>
+            <div class="stat-label">Completed</div>
+            <div class="stat-detail">Jobs finished</div>
+        </div>
+
+        <!-- Customer Statistics -->
+        <div class="stat-card">
+            <div class="stat-number">@Model.TotalCustomers</div>
+            <div class="stat-label">Total Customers</div>
+            <div class="stat-detail">@Model.ActiveCustomers active</div>
+        </div>
+
+        <!-- Transport Unit Statistics -->
+        <div class="stat-card">
+            <div class="stat-number">@Model.AvailableTransportUnits</div>
+            <div class="stat-label">Available Units</div>
+            <div class="stat-detail">@Model.AssignedTransportUnits assigned</div>
+        </div>
+
+        <!-- Resource Statistics -->
+        <div class="stat-card">
+            <div class="stat-number">@Model.TotalDrivers</div>
+            <div class="stat-label">Total Drivers</div>
+            <div class="stat-detail">@Model.TotalAssistants assistants</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">@Model.TotalLorries</div>
+            <div class="stat-label">Total Lorries</div>
+            <div class="stat-detail">@Model.TotalContainers containers</div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard Content -->
+<div class="dashboard-content">
+    <div class="dashboard-row">
+        <!-- Priority Jobs Panel -->
+        <div class="dashboard-panel">
+            <div class="panel-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Priority Jobs</h3>
+                <small>Jobs requiring immediate attention</small>
+            </div>
+            <div class="panel-content">
+                <div class="priority-item">
+                    <div class="priority-badge bg-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="priority-content">
+                        <strong>@Model.UrgentJobs</strong>
+                        <span>Urgent Jobs</span>
+                    </div>
+                </div>
+                <div class="priority-item">
+                    <div class="priority-badge bg-warning">
+                        <i class="fas fa-exclamation"></i>
+                    </div>
+                    <div class="priority-content">
+                        <strong>@Model.HighPriorityJobs</strong>
+                        <span>High Priority</span>
+                    </div>
+                </div>
+                <div class="priority-item">
+                    <div class="priority-badge bg-info">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="priority-content">
+                        <strong>@Model.NormalPriorityJobs</strong>
+                        <span>Normal Priority</span>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                <a href="@Url.Action("Index", "Job")" class="btn btn-outline btn-sm">
+                    <i class="fas fa-eye"></i> View All Jobs
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Actions Panel -->
+        <div class="dashboard-panel">
+            <div class="panel-header">
+                <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                <small>Common administrative tasks</small>
+            </div>
+            <div class="panel-content">
+                <div class="quick-actions">
+                    <a href="@Url.Action("Index", "Job")" class="quick-action-btn">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Manage Jobs</span>
+                    </a>
+                    <a href="@Url.Action("Index", "Customer")" class="quick-action-btn">
+                        <i class="fas fa-users"></i>
+                        <span>View Customers</span>
+                    </a>
+                    <a href="@Url.Action("Index", "TransportUnit")" class="quick-action-btn">
+                        <i class="fas fa-truck"></i>
+                        <span>Transport Units</span>
+                    </a>
+                    <a href="@Url.Action("Index", "Driver")" class="quick-action-btn">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Manage Drivers</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="dashboard-panel full-width">
+        <div class="panel-header">
+            <h3><i class="fas fa-clock"></i> Recent Activity</h3>
+            <small>Latest jobs and system activity</small>
+        </div>
+        <div class="panel-content">
+            @if (Model.RecentJobs != null && ((IEnumerable<dynamic>)Model.RecentJobs).Any())
+            {
+                <div class="recent-jobs-list">
+                    @foreach (var job in Model.RecentJobs)
+                    {
+                        <div class="recent-job-item">
+                            <div class="job-info">
+                                <div class="job-header">
+                                    <strong class="text-primary">@job.JobNumber</strong>
+                                    <span class="badge bg-@GetStatusClass(job.Status)">@job.Status</span>
+                                </div>
+                                <div class="job-details">
+                                    <h4>@job.JobTitle</h4>
+                                    <p class="text-muted">
+                                        <i class="fas fa-user"></i> @job.Customer?.FullName
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-calendar"></i> @job.JobDate.ToShortDateString()
+                                        <span class="mx-2">•</span>
+                                        <span class="badge bg-@GetPriorityClass(job.Priority)">@job.Priority</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="job-actions">
+                                <a href="@Url.Action("Details", "Job", new { id = job.JobId })" class="btn btn-outline btn-sm">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>No recent activity to display</p>
+                </div>
+            }
+        </div>
+        <div class="panel-footer">
+            <a href="@Url.Action("Index", "Job")" class="btn btn-primary">
+                <i class="fas fa-list"></i> View All Jobs
+            </a>
+        </div>
+    </div>
+</div>

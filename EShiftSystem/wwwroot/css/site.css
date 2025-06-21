@@ -421,7 +421,296 @@ h1, h2, h3, h4, h5, h6 {
     }
 
 .divider-text {
+    background-color: var(--white);
     padding: 0 1rem;
-    color: #6c757d;
-    font-size: 0.9rem;
+    color: var(--dark-gray);
+    font-weight: 500;
+}
+
+/* Search and Filter Styles */
+.search-filter-container {
+    background: linear-gradient(135deg, var(--white) 0%, #f8f9fc 100%);
+    border: 1px solid #e3e6f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 64, 128, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.search-filter-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+}
+
+.search-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.search-section {
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    color: var(--primary);
+    font-size: 13px;
+    z-index: 1;
+    opacity: 0.7;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 10px 10px 32px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background-color: var(--white);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 64, 128, 0.1);
+    transform: translateY(-1px);
+}
+
+.search-input::placeholder {
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+.filter-section {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 100px;
+}
+
+.filter-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 0;
+    opacity: 0.8;
+}
+
+.filter-select {
+    padding: 9px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: var(--white);
+    font-size: 13px;
+    color: var(--dark-gray);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 100px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 8px center;
+    background-repeat: no-repeat;
+    background-size: 12px;
+    padding-right: 28px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 64, 128, 0.1);
+    transform: translateY(-1px);
+}
+
+.filter-select:hover {
+    border-color: var(--primary-light);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Clear filters button */
+#clearFilters {
+    margin-top: 0;
+    padding: 9px 14px;
+    font-size: 12px;
+    border-width: 1px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background-color: #f3f4f6;
+    border-color: #d1d5db;
+    color: #6b7280;
+    height: fit-content;
+}
+
+#clearFilters:hover {
+    background-color: #e5e7eb;
+    border-color: #9ca3af;
+    color: #4b5563;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+#clearFilters i {
+    font-size: 10px;
+}
+
+/* Table Sorting Styles */
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.sortable:hover {
+    background-color: var(--light-gray);
+    color: var(--primary);
+}
+
+.sort-icon {
+    margin-left: 6px;
+    opacity: 0.6;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.sortable:hover .sort-icon {
+    opacity: 1;
+    color: var(--primary);
+}
+
+.sortable.sorted {
+    background-color: var(--light-gray);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.sortable.sorted .sort-icon {
+    opacity: 1;
+    color: var(--primary);
+}
+
+/* Responsive design for search and filters */
+@media (max-width: 768px) {
+    .search-filter-container {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .search-filter-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .search-section {
+        min-width: unset;
+    }
+    
+    .filter-section {
+        justify-content: flex-start;
+        gap: 8px;
+    }
+    
+    .filter-group {
+        flex: 1;
+        min-width: 80px;
+    }
+    
+    .filter-select {
+        min-width: 80px;
+        font-size: 12px;
+        padding: 8px 8px 8px 8px;
+        padding-right: 24px;
+    }
+    
+    #clearFilters {
+        margin-top: 0;
+        align-self: flex-start;
+        padding: 8px 12px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-filter-container {
+        padding: 10px;
+        border-radius: 8px;
+    }
+    
+    .search-input {
+        padding: 8px 8px 8px 28px;
+        font-size: 13px;
+    }
+    
+    .search-icon {
+        left: 8px;
+        font-size: 12px;
+    }
+    
+    .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+    
+    .filter-group {
+        min-width: unset;
+    }
+    
+    .filter-select {
+        min-width: unset;
+        width: 100%;
+    }
+    
+    #clearFilters {
+        align-self: stretch;
+        justify-content: center;
+        margin-top: 4px;
+    }
+}
+
+/* Custom light success badge for Delivered status */
+.badge.bg-light-success {
+    background-color: #a8e6a3 !important;
+    color: #155724 !important;
+    border: 1px solid #c3e6cb;
+}
+
+/* Alert variant for delivered status */
+.alert-light-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
 }

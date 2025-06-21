@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
+using EShiftSystem.Models.Enums;
 
 namespace EShiftSystem.Models
 {
@@ -25,6 +26,9 @@ namespace EShiftSystem.Models
         [Range(1, int.MaxValue, ErrorMessage = "Please select a Container.")]
         public int ContainerId { get; set; }
         public  Container? Container { get; set; }
+        
+        [DisplayName("Status")]
+        public TransportUnitStatus Status { get; set; } = TransportUnitStatus.Available;
     }
 
 }

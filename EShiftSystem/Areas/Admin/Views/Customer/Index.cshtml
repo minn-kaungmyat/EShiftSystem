@@ -1,0 +1,312 @@
+@model IEnumerable<EShiftSystem.Models.Customer>
+
+@{
+    ViewData["Title"] = "Customer Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-header">
+    <h2>Customers</h2>
+</div>
+
+<!-- Search and Filter Section -->
+<div class="search-filter-container">
+    <div class="search-filter-row">
+        <div class="search-section">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Search customers by name, email or phone..." class="search-input">
+            </div>
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="statusFilter" class="filter-label">Status:</label>
+                <select id="statusFilter" class="filter-select">
+                    <option value="">All</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            
+            <button type="button" id="clearFilters" class="btn btn-outline btn-sm">
+                <i class="fas fa-times"></i> Clear
+            </button>
+        </div>
+    </div>
+</div>
+
+<table id="customersTable">
+    <thead>
+        <tr>
+            <th class="sortable" data-column="id">
+                ID <i class="fas fa-sort sort-icon"></i>
+            </th>
+            <th class="sortable" data-column="name">
+                Full Name <i class="fas fa-sort sort-icon"></i>
+            </th>
+            <th class="sortable" data-column="email">
+                Email <i class="fas fa-sort sort-icon"></i>
+            </th>
+            <th class="sortable" data-column="phone">
+                Phone <i class="fas fa-sort sort-icon"></i>
+            </th>
+            <th>Address</th>
+            <th class="sortable" data-column="jobs">
+                Total Jobs <i class="fas fa-sort sort-icon"></i>
+            </th>
+            <th class="sortable" data-column="status">
+                Status <i class="fas fa-sort sort-icon"></i>
+            </th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Any())
+        {
+            @foreach (var customer in Model)
+            {
+                <tr data-name="@customer.FullName.ToLower()"
+                    data-email="@(customer.ApplicationUser?.Email?.ToLower() ?? "")"
+                    data-phone="@(customer.Phone?.ToLower() ?? "")"
+                    data-username="@(customer.ApplicationUser?.UserName?.ToLower() ?? "")"
+                    data-status="@(customer.IsActive ? "active" : "inactive")"
+                    data-id="@customer.CustomerId"
+                    data-jobs="@(customer.Jobs?.Count ?? 0)"
+                    data-is-active="@customer.IsActive.ToString().ToLower()">
+                    <td>@customer.CustomerId</td>
+                    <td>
+@customer.FullName
+                       
+                    </td>
+                    <td>@(customer.ApplicationUser?.Email ?? "N/A")</td>
+                    <td>@(customer.Phone ?? "N/A")</td>
+                    <td>
+                        @if (customer.Address?.Length > 30)
+                        {
+                            <span title="@customer.Address">@customer.Address.Substring(0, 30)...</span>
+                        }
+                        else
+                        {
+                            @customer.Address
+                        }
+                    </td>
+                    <td>
+                        <span class="badge bg-@(customer.Jobs?.Count > 0 ? "success" : "secondary")">
+                            @(customer.Jobs?.Count ?? 0)
+                        </span>
+                    </td>
+                    <td>
+                        @if (customer.IsActive)
+                        {
+                            <span class="badge bg-success">
+                                 Active
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">
+                               Inactive
+                            </span>
+                        }
+                    </td>
+                    <td>
+                        <a class="btn btn-outline me-2" asp-action="Details" asp-route-id="@customer.CustomerId" title="View Details">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="9" class="text-center py-4">
+                    <div class="text-muted">
+                        <i class="fas fa-users fa-3x mb-3"></i>
+                        <h5>No customers found</h5>
+                        <p>Customers will appear here when users register through the registration form.</p>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Reactivate Confirmation Modal -->
+<div class="modal fade" id="reactivateConfirmModal" tabindex="-1" aria-labelledby="reactivateConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reactivateConfirmModalLabel">Confirm Reactivation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to reactivate this customer?</p>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Effect:</strong> The customer will be restored to active status and will be able to access their account normally.
+                </div>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Customer:</dt>
+                    <dd class="col-sm-8" id="reactivateCustomerName"></dd>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                <form id="reactivateForm" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-user-check"></i> Reactivate Customer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Reactivate customer function
+function reactivateCustomer(customerId, customerName) {
+    document.getElementById('reactivateCustomerName').textContent = customerName;
+    document.getElementById('reactivateForm').action = '@Url.Action("Reactivate")/' + customerId;
+    
+    const modal = new bootstrap.Modal(document.getElementById('reactivateConfirmModal'));
+    modal.show();
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+    const table = document.getElementById('customersTable');
+    const tableRows = table.querySelectorAll('tbody tr');
+    const sortableHeaders = table.querySelectorAll('th.sortable');
+    
+    let currentSort = { column: null, direction: 'asc' };
+
+    // Search functionality
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusValue = statusFilter.value;
+        
+        tableRows.forEach(row => {
+            const name = row.getAttribute('data-name') || '';
+            const email = row.getAttribute('data-email') || '';
+            const phone = row.getAttribute('data-phone') || '';
+            const username = row.getAttribute('data-username') || '';
+            const status = row.getAttribute('data-status') || '';
+            
+            const matchesSearch = !searchTerm || 
+                name.includes(searchTerm) ||
+                email.includes(searchTerm) ||
+                phone.includes(searchTerm) ||
+                username.includes(searchTerm);
+            
+            const matchesStatus = !statusValue || status === statusValue;
+            
+            row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+        });
+    }
+
+    // Sorting functionality
+    function sortTable(column, direction) {
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+        rows.sort((a, b) => {
+            let aValue, bValue;
+            
+            switch(column) {
+                case 'id':
+                    aValue = parseInt(a.getAttribute('data-id'));
+                    bValue = parseInt(b.getAttribute('data-id'));
+                    break;
+                case 'name':
+                    aValue = a.getAttribute('data-name');
+                    bValue = b.getAttribute('data-name');
+                    break;
+                case 'username':
+                    aValue = a.getAttribute('data-username');
+                    bValue = b.getAttribute('data-username');
+                    break;
+                case 'email':
+                    aValue = a.getAttribute('data-email');
+                    bValue = b.getAttribute('data-email');
+                    break;
+                case 'phone':
+                    aValue = a.getAttribute('data-phone');
+                    bValue = b.getAttribute('data-phone');
+                    break;
+                case 'jobs':
+                    aValue = parseInt(a.getAttribute('data-jobs'));
+                    bValue = parseInt(b.getAttribute('data-jobs'));
+                    break;
+                case 'status':
+                    aValue = a.getAttribute('data-status');
+                    bValue = b.getAttribute('data-status');
+                    break;
+                default:
+                    return 0;
+            }
+            
+            if (typeof aValue === 'number' && typeof bValue === 'number') {
+                return direction === 'asc' ? aValue - bValue : bValue - aValue;
+            } else {
+                return direction === 'asc' ? 
+                    aValue.localeCompare(bValue) : 
+                    bValue.localeCompare(aValue);
+            }
+        });
+        
+        // Clear tbody and append sorted rows
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', filterTable);
+    statusFilter.addEventListener('change', filterTable);
+    
+    clearFiltersBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        statusFilter.value = '';
+        filterTable();
+    });
+
+    // Sorting event listeners
+    sortableHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const column = this.getAttribute('data-column');
+            const direction = currentSort.column === column && currentSort.direction === 'asc' ? 'desc' : 'asc';
+            
+            // Update sort icons
+            sortableHeaders.forEach(h => {
+                const icon = h.querySelector('.sort-icon');
+                icon.className = 'fas fa-sort sort-icon';
+            });
+            
+            const icon = this.querySelector('.sort-icon');
+            icon.className = direction === 'asc' ? 'fas fa-sort-up sort-icon' : 'fas fa-sort-down sort-icon';
+            
+            currentSort = { column, direction };
+            sortTable(column, direction);
+        });
+    });
+});
+</script>
+
+<style>
+.info-note {
+    background-color: #e3f2fd;
+    border: 1px solid #2196f3;
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    color: #1976d2;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.info-note i {
+    margin-right: 0.5rem;
+}
+</style>

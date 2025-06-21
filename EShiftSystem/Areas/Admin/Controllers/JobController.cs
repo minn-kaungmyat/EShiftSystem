@@ -72,11 +72,12 @@ namespace EShiftSystem.Areas.Admin.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Get available transport units for assignment
+                // Get available transport units for assignment (only Available status)
                 var availableTransportUnits = await _context.TransportUnits
                     .Include(tu => tu.Driver)
                     .Include(tu => tu.Container)
                     .Include(tu => tu.Assistants)
+                    .Where(tu => tu.Status == TransportUnitStatus.Available)
                     .ToListAsync();
 
                 ViewData["TransportUnits"] = new SelectList(availableTransportUnits, "TransportUnitId", "Name");
@@ -107,35 +108,71 @@ namespace EShiftSystem.Areas.Admin.Controllers
                     return RedirectToAction(nameof(Details), new { id = jobId });
                 }
 
-                var oldTransportUnitName = load.TransportUnit?.Name;
-                var newTransportUnitName = transportUnitId.HasValue 
-                    ? (await _context.TransportUnits.FindAsync(transportUnitId))?.Name 
+                // Check if job is approved or in progress before allowing transport unit assignment
+                if (load.Job.Status != JobStatus.Approved && load.Job.Status != JobStatus.InProgress)
+                {
+                    TempData["ErrorMessage"] = $"Transport units can only be assigned to approved jobs. Current job status: {load.Job.Status}";
+                    return RedirectToAction(nameof(Details), new { id = jobId });
+                }
+
+                var oldTransportUnit = load.TransportUnit;
+                var oldTransportUnitName = oldTransportUnit?.Name;
+                var newTransportUnit = transportUnitId.HasValue 
+                    ? await _context.TransportUnits.FindAsync(transportUnitId)
                     : null;
+                var newTransportUnitName = newTransportUnit?.Name;
+
+                // Check if the new transport unit is available (if assigning)
+                if (transportUnitId.HasValue && newTransportUnit?.Status != TransportUnitStatus.Available)
+                {
+                    TempData["ErrorMessage"] = "Selected transport unit is not available for assignment.";
+                    return RedirectToAction(nameof(Details), new { id = jobId });
+                }
+
+                // Update previous transport unit status to Available (if unassigning)
+                if (oldTransportUnit != null)
+                {
+                    oldTransportUnit.Status = TransportUnitStatus.Available;
+                }
 
                 // Update transport unit assignment
                 load.TransportUnitId = transportUnitId;
+
+                // Update new transport unit status to Assigned (if assigning)
+                if (newTransportUnit != null)
+                {
+                    newTransportUnit.Status = TransportUnitStatus.Assigned;
+                }
                 
                 // If transport unit is assigned, update status to InProgress
                 if (transportUnitId.HasValue)
                 {
                     load.Status = JobStatus.InProgress;
                     
-                    // Update job status if all loads are in progress
-                    var allLoadsInProgress = await _context.Loads
+                    // Update job status to InProgress if at least one load has transport unit assigned
+                    var hasAnyAssignedLoad = await _context.Loads
                         .Where(l => l.JobId == jobId)
-                        .AllAsync(l => l.Status == JobStatus.InProgress);
+                        .AnyAsync(l => l.TransportUnitId.HasValue || l.LoadId == loadId);
                     
-                    if (allLoadsInProgress)
+                    if (hasAnyAssignedLoad && load.Job.Status == JobStatus.Approved)
                     {
                         load.Job.Status = JobStatus.InProgress;
                     }
 
-                    TempData["SuccessMessage"] = $"Transport unit '{newTransportUnitName}' has been assigned to the load.";
+                    TempData["SuccessMessage"] = $"Transport unit '{newTransportUnitName}' has been assigned to the load. Job status updated to In Progress.";
                 }
                 else
                 {
-                    load.Status = JobStatus.Pending;
-                    load.Job.Status = JobStatus.Pending;
+                    load.Status = JobStatus.Approved; // Reset to approved when unassigning
+                    // Only reset job status if all loads are back to approved
+                    var allLoadsApproved = await _context.Loads
+                        .Where(l => l.JobId == jobId)
+                        .AllAsync(l => l.Status == JobStatus.Approved);
+                    
+                    if (allLoadsApproved)
+                    {
+                        load.Job.Status = JobStatus.Approved;
+                    }
                     TempData["SuccessMessage"] = oldTransportUnitName != null 
                         ? $"Transport unit '{oldTransportUnitName}' has been unassigned from the load."
                         : "Transport unit has been unassigned from the load.";
@@ -168,54 +205,36 @@ namespace EShiftSystem.Areas.Admin.Controllers
                     return RedirectToAction(nameof(Details), new { id = jobId });
                 }
 
-                var oldStatus = load.Status;
-                
-                // Update load status
-                load.Status = status;
-
-                // If load is completed or cancelled, unassign the transport unit
-                if (status == JobStatus.Completed || status == JobStatus.Cancelled)
+                // Admin can only update InProgress loads to Delivered
+                if (load.Status != JobStatus.InProgress)
                 {
-                    // Store the old transport unit name for message
-                    var oldTransportUnitName = load.TransportUnit?.Name;
-                    if (oldTransportUnitName != null)
-                    {
-                        TempData["SuccessMessage"] = $"Transport Unit '{oldTransportUnitName}' has been unassigned as the load is {status.ToString().ToLower()}.";
-                    }
-                    load.TransportUnitId = null;
+                    TempData["ErrorMessage"] = "Only loads in progress can be marked as delivered.";
+                    return RedirectToAction(nameof(Details), new { id = jobId });
                 }
-                
-                // Update job status based on load statuses
+
+                if (status != JobStatus.Delivered)
+                {
+                    TempData["ErrorMessage"] = "Admins can only mark loads as delivered.";
+                    return RedirectToAction(nameof(Details), new { id = jobId });
+                }
+
+                // Update load status to Delivered
+                load.Status = JobStatus.Delivered;
+
+                // Check if all loads in the job are delivered
                 var allLoads = await _context.Loads
                     .Where(l => l.JobId == jobId)
                     .ToListAsync();
 
-                if (allLoads.All(l => l.Status == JobStatus.Completed))
+                if (allLoads.All(l => l.Status == JobStatus.Delivered))
                 {
-                    load.Job.Status = JobStatus.Completed;
-                    
-                    // Unassign transport units from all loads if not already unassigned
-                    foreach (var jobLoad in allLoads.Where(l => l.TransportUnitId.HasValue))
-                    {
-                        jobLoad.TransportUnitId = null;
-                    }
-                    
-                    TempData["SuccessMessage"] = "Job has been marked as completed. All transport units have been unassigned.";
-                }
-                else if (allLoads.Any(l => l.Status == JobStatus.Cancelled))
-                {
-                    load.Job.Status = JobStatus.Cancelled;
-                    TempData["SuccessMessage"] = "Job status has been updated to Cancelled.";
-                }
-                else if (allLoads.Any(l => l.Status == JobStatus.InProgress))
-                {
-                    load.Job.Status = JobStatus.InProgress;
-                    TempData["SuccessMessage"] = "Job status has been updated to In Progress.";
+                    load.Job.Status = JobStatus.Delivered;
+                    load.Job.UpdatedAt = DateTime.Now;
+                    TempData["SuccessMessage"] = "Load marked as delivered! All loads delivered - job status updated to Delivered.";
                 }
                 else
                 {
-                    load.Job.Status = JobStatus.Pending;
-                    TempData["SuccessMessage"] = "Job status has been updated to Pending.";
+                    TempData["SuccessMessage"] = "Load marked as delivered successfully.";
                 }
 
                 await _context.SaveChangesAsync();
@@ -223,6 +242,74 @@ namespace EShiftSystem.Areas.Admin.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "An error occurred while updating load status: " + ex.Message;
+            }
+
+            return RedirectToAction(nameof(Details), new { id = jobId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveJob(int jobId)
+        {
+            try
+            {
+                var job = await _context.Jobs.FindAsync(jobId);
+                if (job == null)
+                {
+                    TempData["ErrorMessage"] = "Job not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (job.Status != JobStatus.Pending)
+                {
+                    TempData["ErrorMessage"] = "Only pending jobs can be approved.";
+                    return RedirectToAction(nameof(Details), new { id = jobId });
+                }
+
+                job.Status = JobStatus.Approved;
+                job.UpdatedAt = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Job has been approved successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while approving the job: " + ex.Message;
+            }
+
+            return RedirectToAction(nameof(Details), new { id = jobId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectJob(int jobId, string rejectionReason = "")
+        {
+            try
+            {
+                var job = await _context.Jobs.FindAsync(jobId);
+                if (job == null)
+                {
+                    TempData["ErrorMessage"] = "Job not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (job.Status != JobStatus.Pending)
+                {
+                    TempData["ErrorMessage"] = "Only pending jobs can be rejected.";
+                    return RedirectToAction(nameof(Details), new { id = jobId });
+                }
+
+                job.Status = JobStatus.Rejected;
+                job.UpdatedAt = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = string.IsNullOrEmpty(rejectionReason) 
+                    ? "Job has been rejected." 
+                    : $"Job has been rejected. Reason: {rejectionReason}";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while rejecting the job: " + ex.Message;
             }
 
             return RedirectToAction(nameof(Details), new { id = jobId });

@@ -15,9 +15,12 @@
     string GetStatusClass(JobStatus status) => status switch
     {
         JobStatus.Pending => "warning",
+        JobStatus.Approved => "info",
+        JobStatus.Rejected => "danger",
         JobStatus.InProgress => "primary",
+        JobStatus.Delivered => "light-success",
         JobStatus.Completed => "success",
-        JobStatus.Cancelled => "danger",
+        JobStatus.Cancelled => "secondary",
         _ => "secondary"
     };
 }
@@ -25,11 +28,14 @@
 <div class="content-header">
     <h2>Job Details</h2>
     <div class="action-buttons">
-        @if (Model.Status == JobStatus.Pending)
+        @if (Model.Status == JobStatus.Pending || Model.Status == JobStatus.Approved)
         {
             <a class="btn btn-outline-secondary me-2" asp-action="Edit" asp-route-id="@Model.JobId">
                 <i class="fas fa-edit"></i> Edit
             </a>
+        }
+        @if (Model.Status == JobStatus.Pending)
+        {
             <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
                 <i class="fas fa-trash-alt"></i> Delete
             </button>
@@ -49,6 +55,9 @@
             <div class="row">
                 <div class="col-md-6">
                     <dl class="row">
+                        <dt class="col-sm-4">Job Number</dt>
+                        <dd class="col-sm-8"><strong class="text-primary">@Model.JobNumber</strong></dd>
+
                         <dt class="col-sm-4">Title</dt>
                         <dd class="col-sm-8">@Model.JobTitle</dd>
 
@@ -81,8 +90,10 @@
             {
                 <div class="row mt-3">
                     <div class="col-12">
-                        <dt>Description</dt>
-                        <dd class="text-muted">@Model.Description</dd>
+                        <dl>
+                            <dt>Description</dt>
+                            <dd class="text-muted">@Model.Description</dd>
+                        </dl>
                     </div>
                 </div>
             }
@@ -114,35 +125,80 @@
                             </h2>
                             <div id="load-@load.LoadId" class="accordion-collapse collapse">
                                 <div class="accordion-body">
-                                    <h6 class="mb-3">Items in this Load</h6>
-                                    @if (load.LoadItems != null && load.LoadItems.Any())
-                                    {
-                                        <div class="table-responsive">
-                                            <table class="table table-sm">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Item Type</th>
-                                                        <th>Quantity</th>
-                                                        <th>Note</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach (var item in load.LoadItems)
-                                                    {
-                                                        <tr>
-                                                            <td>@item.ItemType</td>
-                                                            <td>@item.Quantity</td>
-                                                            <td>@(string.IsNullOrEmpty(item.Note) ? "-" : item.Note)</td>
-                                                        </tr>
-                                                    }
-                                                </tbody>
-                                            </table>
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h6 class="mb-3">Items in this Load</h6>
+                                            @if (load.LoadItems != null && load.LoadItems.Any())
+                                            {
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Item Type</th>
+                                                                <th>Quantity</th>
+                                                                <th>Note</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var item in load.LoadItems)
+                                                            {
+                                                                <tr>
+                                                                    <td>@item.ItemType</td>
+                                                                    <td>@item.Quantity</td>
+                                                                    <td>@(string.IsNullOrEmpty(item.Note) ? "-" : item.Note)</td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <p class="text-muted mb-0">No items added to this load.</p>
+                                            }
                                         </div>
-                                    }
-                                    else
-                                    {
-                                        <p class="text-muted mb-0">No items added to this load.</p>
-                                    }
+                                        <div class="col-md-4">
+                                            <h6 class="mb-3">Delivery Status</h6>
+                                            @if (load.Status == JobStatus.InProgress)
+                                            {
+                                                <div class="alert alert-info">
+                                                    <i class="fas fa-truck me-2"></i>
+                                                    Load is currently being transported
+                                                </div>
+                                            }
+                                            else if (load.Status == JobStatus.Delivered)
+                                            {
+                                                <div class="alert alert-light-success">
+                                                    <i class="fas fa-box me-2"></i>
+                                                    Load has been delivered
+                                                </div>
+                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#completedModal-@load.LoadId">
+                                                    <i class="fas fa-check"></i> Confirm Received
+                                                </button>
+                                            }
+                                            else if (load.Status == JobStatus.Completed)
+                                            {
+                                                <div class="alert alert-success">
+                                                    <i class="fas fa-check-circle me-2"></i>
+                                                    Load completed and confirmed
+                                                </div>
+                                            }
+                                            else if (load.Status == JobStatus.Approved)
+                                            {
+                                                <div class="alert alert-warning">
+                                                    <i class="fas fa-clock me-2"></i>
+                                                    Waiting for transport assignment
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="alert alert-secondary">
+                                                    <i class="fas fa-info-circle me-2"></i>
+                                                    Status: @load.Status
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -172,6 +228,8 @@
                     This action cannot be undone.
                 </div>
                 <dl class="row mb-0">
+                    <dt class="col-sm-4">Job Number</dt>
+                    <dd class="col-sm-8"><strong class="text-primary">@Model.JobNumber</strong></dd>
                     <dt class="col-sm-4">Job Title</dt>
                     <dd class="col-sm-8">@Model.JobTitle</dd>
                     <dt class="col-sm-4">Date</dt>
@@ -191,6 +249,52 @@
         </div>
     </div>
 </div>
+
+<!-- Completion Confirmation Modals -->
+@if (Model.Loads != null && Model.Loads.Any())
+{
+    @foreach (var load in Model.Loads.Where(l => l.Status == JobStatus.Delivered))
+    {
+        <div class="modal fade" id="completedModal-@load.LoadId" tabindex="-1" aria-labelledby="completedModalLabel-@load.LoadId" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="completedModalLabel-@load.LoadId">Confirm Load Received</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Please confirm that you have received this load and are satisfied with the delivery.</p>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Load Details:</strong><br>
+                            From: @load.StartLocation<br>
+                            To: @load.Destination<br>
+                            Items: @(load.LoadItems?.Count ?? 0) item(s)
+                        </div>
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            This load has been marked as delivered by our team.
+                        </div>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            By confirming, you acknowledge that you have received the load in satisfactory condition.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form asp-action="MarkLoadCompleted" method="post" class="d-inline">
+                            <input type="hidden" name="jobId" value="@Model.JobId" />
+                            <input type="hidden" name="loadId" value="@load.LoadId" />
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Confirm Received
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
 
 @section Styles {
     <style>

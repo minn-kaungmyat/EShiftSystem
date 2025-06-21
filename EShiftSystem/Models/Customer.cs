@@ -24,6 +24,9 @@ namespace EShiftSystem.Models
         [Required]
         public required string FullName { get; set; }
 
+        [Required]
+        public bool IsActive { get; set; } = true; // Default to active
+
         public ICollection<Job>? Jobs { get; set; }
     }
 

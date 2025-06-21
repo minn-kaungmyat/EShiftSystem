@@ -1,6 +1,163 @@
-﻿@{
-    Layout = "~/Views/Shared/_Layout.cshtml";  // or a Customer-specific layout if you want
+﻿@model dynamic
+@using EShiftSystem.Models.Enums
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string GetStatusClass(JobStatus status) => status switch
+    {
+        JobStatus.Pending => "warning",
+        JobStatus.Approved => "info",
+        JobStatus.Rejected => "danger",
+        JobStatus.InProgress => "primary",
+        JobStatus.Delivered => "light-success",
+        JobStatus.Completed => "success",
+        JobStatus.Cancelled => "secondary",
+        _ => "secondary"
+    };
 }
 
-<h2>Customer Dashboard</h2>
-<p>Welcome, Customer! This is your dashboard.</p>
+@section Styles {
+    <link rel="stylesheet" href="~/Areas/Customer/Views/Dashboard/Index.cshtml.css" />
+}
+
+<div class="content-header">
+    <h2>Welcome back, @Model.CustomerName!</h2>
+</div>
+
+<!-- Essential Statistics Only -->
+<div class="dashboard-stats">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">@Model.TotalJobs</div>
+            <div class="stat-label">Total Jobs</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">@Model.ActiveJobs</div>
+            <div class="stat-label">Active Jobs</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">@Model.CompletedJobs</div>
+            <div class="stat-label">Completed</div>
+        </div>
+
+        @if (Model.JobsAwaitingConfirmation > 0)
+        {
+            <div class="stat-card stat-highlight">
+                <div class="stat-number">@Model.JobsAwaitingConfirmation</div>
+                <div class="stat-label">Need Confirmation</div>
+                <div class="stat-detail">Action Required</div>
+            </div>
+        }
+        else
+        {
+            <div class="stat-card">
+                <div class="stat-number">0</div>
+                <div class="stat-label">Need Confirmation</div>
+                <div class="stat-detail">All caught up!</div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="dashboard-content">
+    <div class="dashboard-panel quick-actions-panel">
+        <div class="panel-header">
+            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+        </div>
+        <div class="panel-content">
+            <div class="quick-actions">
+                <a href="@Url.Action("Create", "Job")" class="quick-action-btn">
+                    <i class="fas fa-plus"></i>
+                    <span>New Job</span>
+                </a>
+                <a href="@Url.Action("Index", "Job")" class="quick-action-btn">
+                    <i class="fas fa-list-alt"></i>
+                    <span>My Jobs</span>
+                </a>
+                @if (Model.JobsAwaitingConfirmation > 0)
+                {
+                    <a href="@Url.Action("Index", "Job")" class="quick-action-btn quick-action-highlight">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>Confirm Deliveries</span>
+                    </a>
+                }
+                @if (Model.UrgentActiveJobs > 0)
+                {
+                    <a href="@Url.Action("Index", "Job")" class="quick-action-btn quick-action-urgent">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Urgent Jobs (@Model.UrgentActiveJobs)</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="dashboard-panel full-width">
+        <div class="panel-header">
+            <h3><i class="fas fa-history"></i> Recent Jobs</h3>
+        </div>
+        <div class="panel-content">
+            @if (Model.RecentJobs != null && ((IEnumerable<dynamic>)Model.RecentJobs).Any())
+            {
+                <div class="recent-jobs-list">
+                    @foreach (var job in Model.RecentJobs)
+                    {
+                        <div class="recent-job-item">
+                            <div class="job-info">
+                                <div class="job-header">
+                                    <strong class="text-primary">@job.JobNumber</strong>
+                                    <span class="badge bg-@GetStatusClass(job.Status)">@job.Status</span>
+                                    @if (job.Status == JobStatus.Delivered)
+                                    {
+                                        <span class="action-required">Action Required</span>
+                                    }
+                                    @if (job.Priority == JobPriority.Urgent)
+                                    {
+                                        <span class="badge bg-danger">Urgent</span>
+                                    }
+                                </div>
+                                <div class="job-details">
+                                    <h4>@job.JobTitle</h4>
+                                    <p class="text-muted">
+                                        <i class="fas fa-calendar"></i> @job.JobDate.ToShortDateString()
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="job-actions">
+                                <a href="@Url.Action("Details", "Job", new { id = job.JobId })" class="btn btn-outline btn-sm">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                @if (job.Status == JobStatus.Delivered)
+                                {
+                                    <a href="@Url.Action("Details", "Job", new { id = job.JobId })" class="btn btn-success btn-sm">
+                                        <i class="fas fa-check"></i> Confirm
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h4>No Jobs Yet</h4>
+                    <p><a href="@Url.Action("Create", "Job")">Create your first job</a> to get started!</p>
+                </div>
+            }
+        </div>
+        <div class="panel-footer">
+            <a href="@Url.Action("Index", "Job")" class="btn btn-primary">
+                <i class="fas fa-list"></i> View All Jobs
+            </a>
+            <a href="@Url.Action("Create", "Job")" class="btn btn-secondary">
+                <i class="fas fa-plus"></i> New Job
+            </a>
+        </div>
+    </div>
+</div>

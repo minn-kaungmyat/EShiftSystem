@@ -1,5 +1,6 @@
 using EShiftSystem.Data;
 using EShiftSystem.Models;
+using EShiftSystem.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,9 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+// Register custom services
+builder.Services.AddScoped<IJobNumberGenerator, JobNumberGenerator>();
 
 builder.Services.AddControllersWithViews();
 

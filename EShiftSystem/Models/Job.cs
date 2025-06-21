@@ -10,6 +10,11 @@
             public int JobId { get; set; }
 
             [Required]
+            [MaxLength(20)]
+            [Display(Name = "Job Number")]
+            public string JobNumber { get; set; } = string.Empty;
+
+            [Required]
             public DateTime JobDate { get; set; }
 
             [Required]

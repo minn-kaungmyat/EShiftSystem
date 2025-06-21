@@ -14,9 +14,12 @@
     string GetStatusClass(JobStatus status) => status switch
     {
         JobStatus.Pending => "warning",
+        JobStatus.Approved => "info",
+        JobStatus.Rejected => "danger",
         JobStatus.InProgress => "primary",
+        JobStatus.Delivered => "light-success",
         JobStatus.Completed => "success",
-        JobStatus.Cancelled => "danger",
+        JobStatus.Cancelled => "secondary",
         _ => "secondary"
     };
 }
@@ -25,24 +28,91 @@
     <h2>All Jobs</h2>
 </div>
 
-<div >
-    <table >
+<!-- Search and Filter Section -->
+<div class="search-filter-container">
+    <div class="search-filter-row">
+        <div class="search-section">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Search jobs by number, title or customer..." class="search-input">
+            </div>
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="priorityFilter" class="filter-label">Priority:</label>
+                <select id="priorityFilter" class="filter-select">
+                    <option value="">All</option>
+                    <option value="Normal">Normal</option>
+                    <option value="High">High</option>
+                    <option value="Urgent">Urgent</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="statusFilter" class="filter-label">Status:</label>
+                <select id="statusFilter" class="filter-select">
+                    <option value="">All</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="InProgress">In Progress</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+            
+            <button type="button" id="clearFilters" class="btn btn-outline btn-sm">
+                <i class="fas fa-times"></i> Clear
+            </button>
+        </div>
+    </div>
+</div>
+
+<div>
+    <table id="jobsTable">
         <thead>
             <tr>
-                <th>Title</th>
-                <th>Customer</th>
-                <th>Date</th>
-                <th>Priority</th>
-                <th>Status</th>
+                <th class="sortable" data-column="jobNumber">
+                    Job Number <i class="fas fa-sort sort-icon"></i>
+                </th>
+                <th class="sortable" data-column="title">
+                    Title <i class="fas fa-sort sort-icon"></i>
+                </th>
+                <th class="sortable" data-column="customer">
+                    Customer <i class="fas fa-sort sort-icon"></i>
+                </th>
+                <th class="sortable" data-column="date">
+                    Date <i class="fas fa-sort sort-icon"></i>
+                </th>
+                <th class="sortable" data-column="priority">
+                    Priority <i class="fas fa-sort sort-icon"></i>
+                </th>
+                <th class="sortable" data-column="status">
+                    Status <i class="fas fa-sort sort-icon"></i>
+                </th>
                 @* <th>Loads</th> *@
-                <th>Created At</th>
+                <th class="sortable" data-column="createdAt">
+                    Created At <i class="fas fa-sort sort-icon"></i>
+                </th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var job in Model)
             {
-                <tr>
+                <tr data-jobnumber="@job.JobNumber.ToLower()"
+                    data-title="@job.JobTitle.ToLower()" 
+                    data-customer="@(job.Customer?.FullName?.ToLower() ?? "") @(job.Customer?.ApplicationUser?.UserName?.ToLower() ?? "")" 
+                    data-customer-name="@(job.Customer?.FullName?.ToLower() ?? "")"
+                    data-priority="@job.Priority" 
+                    data-status="@job.Status"
+                    data-date="@job.JobDate.ToString("yyyy-MM-dd")"
+                    data-created="@job.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")">
+                    <td>
+                        <strong class="text-primary">@job.JobNumber</strong>
+                    </td>
                     <td>@job.JobTitle</td>
                     <td>
                         <div>@job.Customer?.FullName</div>
@@ -88,4 +158,141 @@
             }
         </tbody>
     </table>
-</div> 
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const priorityFilter = document.getElementById('priorityFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+    const table = document.getElementById('jobsTable');
+    const tableRows = table.querySelectorAll('tbody tr');
+    const sortableHeaders = table.querySelectorAll('th.sortable');
+    
+    let currentSort = { column: null, direction: 'asc' };
+
+    // Sorting functionality
+    function sortTable(column, direction) {
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        
+        const priorityOrder = { 'Normal': 1, 'High': 2, 'Urgent': 3 };
+        const statusOrder = { 'Pending': 1, 'Approved': 2, 'Rejected': 3, 'InProgress': 4, 'Delivered': 5, 'Completed': 6, 'Cancelled': 7 };
+        
+        rows.sort((a, b) => {
+            let aValue, bValue;
+            
+            switch(column) {
+                case 'jobNumber':
+                    aValue = a.getAttribute('data-jobnumber');
+                    bValue = b.getAttribute('data-jobnumber');
+                    break;
+                case 'title':
+                    aValue = a.getAttribute('data-title');
+                    bValue = b.getAttribute('data-title');
+                    break;
+                case 'customer':
+                    aValue = a.getAttribute('data-customer-name');
+                    bValue = b.getAttribute('data-customer-name');
+                    break;
+                case 'date':
+                    aValue = new Date(a.getAttribute('data-date'));
+                    bValue = new Date(b.getAttribute('data-date'));
+                    break;
+                case 'priority':
+                    aValue = priorityOrder[a.getAttribute('data-priority')] || 0;
+                    bValue = priorityOrder[b.getAttribute('data-priority')] || 0;
+                    break;
+                case 'status':
+                    aValue = statusOrder[a.getAttribute('data-status')] || 0;
+                    bValue = statusOrder[b.getAttribute('data-status')] || 0;
+                    break;
+                case 'createdAt':
+                    aValue = new Date(a.getAttribute('data-created'));
+                    bValue = new Date(b.getAttribute('data-created'));
+                    break;
+                default:
+                    return 0;
+            }
+            
+            if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+            if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+        
+        // Remove existing rows and append sorted rows
+        rows.forEach(row => tbody.removeChild(row));
+        rows.forEach(row => tbody.appendChild(row));
+        
+        // Update sort icons
+        updateSortIcons(column, direction);
+    }
+    
+    function updateSortIcons(activeColumn, direction) {
+        sortableHeaders.forEach(header => {
+            const icon = header.querySelector('.sort-icon');
+            const column = header.getAttribute('data-column');
+            
+            if (column === activeColumn) {
+                icon.className = direction === 'asc' ? 'fas fa-sort-up sort-icon' : 'fas fa-sort-down sort-icon';
+                header.classList.add('sorted');
+            } else {
+                icon.className = 'fas fa-sort sort-icon';
+                header.classList.remove('sorted');
+            }
+        });
+    }
+    
+    // Add click event listeners to sortable headers
+    sortableHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const column = this.getAttribute('data-column');
+            let direction = 'asc';
+            
+            if (currentSort.column === column && currentSort.direction === 'asc') {
+                direction = 'desc';
+            }
+            
+            currentSort = { column, direction };
+            sortTable(column, direction);
+        });
+    });
+
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedPriority = priorityFilter.value;
+        const selectedStatus = statusFilter.value;
+
+        tableRows.forEach(row => {
+            const jobNumber = row.getAttribute('data-jobnumber');
+            const title = row.getAttribute('data-title');
+            const customer = row.getAttribute('data-customer');
+            const priority = row.getAttribute('data-priority');
+            const status = row.getAttribute('data-status');
+
+            const matchesSearch = jobNumber.includes(searchTerm) || title.includes(searchTerm) || customer.includes(searchTerm);
+            const matchesPriority = !selectedPriority || priority === selectedPriority;
+            const matchesStatus = !selectedStatus || status === selectedStatus;
+
+            if (matchesSearch && matchesPriority && matchesStatus) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function clearFilters() {
+        searchInput.value = '';
+        priorityFilter.value = '';
+        statusFilter.value = '';
+        filterTable();
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    priorityFilter.addEventListener('change', filterTable);
+    statusFilter.addEventListener('change', filterTable);
+    clearFiltersBtn.addEventListener('click', clearFilters);
+});
+</script> 

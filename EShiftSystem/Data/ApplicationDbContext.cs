@@ -34,6 +34,11 @@ namespace EShiftSystem.Data
             //    .HasValue<Admin>(UserRole.Admin)
             //    .HasValue<Customer>(UserRole.Customer);
 
+            // Configure Job entity
+            modelBuilder.Entity<Job>()
+                .HasIndex(j => j.JobNumber)
+                .IsUnique();
+
             // One Customer has many Jobs
             modelBuilder.Entity<Customer>()
                 .HasMany(c => c.Jobs)

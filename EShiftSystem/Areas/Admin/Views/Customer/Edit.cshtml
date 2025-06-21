@@ -1,0 +1,70 @@
+@model EShiftSystem.Models.Customer
+
+@{
+    ViewData["Title"] = "Edit Customer";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-header">
+    <h2>Edit Customer: @Model.FullName</h2>
+    <div class="info-note">
+        <i class="fas fa-info-circle"></i>
+        Admin editing of customer information. The associated user account cannot be changed.
+    </div>
+</div>
+
+<form asp-action="Edit" method="post">
+    <div class="form-wrapper">
+        <input type="hidden" asp-for="CustomerId" />
+        <input type="hidden" asp-for="ApplicationUserId" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="form-group">
+            <label class="control-label">Associated User Account</label>
+            <div class="form-control-static">@ViewData["ApplicationUserDisplay"]</div>
+            <small class="form-text text-muted">The associated user account cannot be changed after creation.</small>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="FullName" class="control-label"></label>
+            <input asp-for="FullName" class="form-control" placeholder="Enter customer's full name" />
+            <span asp-validation-for="FullName" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Phone" class="control-label">Phone Number</label>
+            <input asp-for="Phone" class="form-control" placeholder="Enter phone number" />
+            <span asp-validation-for="Phone" class="text-danger"></span>
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Address" class="control-label"></label>
+            <input asp-for="Address" class="form-control" placeholder="Enter full address" />
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Update Customer</button>
+        <a asp-action="Details" asp-route-id="@Model.CustomerId" class="btn btn-outline">View Details</a>
+        <a asp-action="Index" class="btn btn-outline">Back to List</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+<style>
+.info-note {
+    background-color: #e3f2fd;
+    border: 1px solid #2196f3;
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    color: #1976d2;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.info-note i {
+    margin-right: 0.5rem;
+}
+</style>

@@ -2,6 +2,7 @@
 using EShiftSystem.Data;
 using EShiftSystem.Models;
 using EShiftSystem.Models.Enums;
+using EShiftSystem.Services;
 using EShiftSystem.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -18,18 +19,20 @@ namespace EShiftSystem.Areas.Customer.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IJobNumberGenerator _jobNumberGenerator;
 
-        public JobController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public JobController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IJobNumberGenerator jobNumberGenerator)
         {
             _context = context;
             _userManager = userManager;
+            _jobNumberGenerator = jobNumberGenerator;
         }
 
         public async Task<IActionResult> Index()
         {
             var currentUser = await _userManager.GetUserAsync(User);
             var customer = await _context.Customers.FirstOrDefaultAsync(c => c.ApplicationUserId == currentUser.Id);
-            return View(await _context.Jobs.Where(j => j.CustomerId == customer.CustomerId).ToListAsync());
+            return View(await _context.Jobs.Where(j => j.CustomerId == customer.CustomerId).OrderByDescending(j => j.CreatedAt).ToListAsync());
         }
 
         // GET: /Customer/Job/Details/5
@@ -94,6 +97,7 @@ namespace EShiftSystem.Areas.Customer.Controllers
 
                 var newJob = new Job
                 {
+                    JobNumber = await _jobNumberGenerator.GenerateJobNumberAsync(),
                     JobTitle = viewModel.JobTitle,
                     Description = viewModel.Description,
                     JobDate = viewModel.JobDate,
@@ -177,9 +181,9 @@ namespace EShiftSystem.Areas.Customer.Controllers
                 return NotFound();
             }
 
-            if (job.Status != JobStatus.Pending)
+            if (job.Status != JobStatus.Pending && job.Status != JobStatus.Approved)
             {
-                TempData["ErrorMessage"] = "Only pending jobs can be edited.";
+                TempData["ErrorMessage"] = "Only pending and approved jobs can be edited.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -224,9 +228,9 @@ namespace EShiftSystem.Areas.Customer.Controllers
                 return NotFound();
             }
 
-            if (job.Status != JobStatus.Pending)
+            if (job.Status != JobStatus.Pending && job.Status != JobStatus.Approved)
             {
-                TempData["ErrorMessage"] = "Only pending jobs can be edited.";
+                TempData["ErrorMessage"] = "Only pending and approved jobs can be edited.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -352,6 +356,8 @@ namespace EShiftSystem.Areas.Customer.Controllers
             var job = await _context.Jobs
                 .Include(j => j.Loads)
                     .ThenInclude(l => l.LoadItems)
+                .Include(j => j.Loads)
+                    .ThenInclude(l => l.TransportUnit)
                 .FirstOrDefaultAsync(j => j.JobId == id && j.CustomerId == customer.CustomerId);
 
             if (job == null)
@@ -368,9 +374,15 @@ namespace EShiftSystem.Areas.Customer.Controllers
 
             try
             {
-                // Remove all loads and their items
+                // Remove all loads and their items, and release transport units
                 foreach (var load in job.Loads.ToList())
                 {
+                    // Release transport unit if assigned
+                    if (load.TransportUnit != null)
+                    {
+                        load.TransportUnit.Status = TransportUnitStatus.Available;
+                    }
+                    
                     foreach (var item in load.LoadItems.ToList())
                     {
                         _context.LoadItems.Remove(item);
@@ -388,6 +400,71 @@ namespace EShiftSystem.Areas.Customer.Controllers
                 TempData["ErrorMessage"] = "An error occurred while deleting the job.";
                 return RedirectToAction(nameof(Details), new { id = job.JobId });
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkLoadCompleted(int jobId, int loadId)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                var customer = await _context.Customers.FirstOrDefaultAsync(c => c.ApplicationUserId == currentUser.Id);
+
+                var load = await _context.Loads
+                    .Include(l => l.Job)
+                    .Include(l => l.TransportUnit)
+                    .FirstOrDefaultAsync(l => l.LoadId == loadId && l.JobId == jobId && l.Job.CustomerId == customer.CustomerId);
+
+                if (load == null)
+                {
+                    TempData["ErrorMessage"] = "Load not found or you don't have permission to update it.";
+                    return RedirectToAction(nameof(Details), new { id = jobId });
+                }
+
+                if (load.Status != JobStatus.Delivered)
+                {
+                    TempData["ErrorMessage"] = "Only delivered loads can be marked as completed.";
+                    return RedirectToAction(nameof(Details), new { id = jobId });
+                }
+
+                // Mark load as completed and unassign transport unit
+                load.Status = JobStatus.Completed;
+                var transportUnitName = load.TransportUnit?.Name;
+                
+                // Set transport unit status back to Available
+                if (load.TransportUnit != null)
+                {
+                    load.TransportUnit.Status = TransportUnitStatus.Available;
+                }
+                
+                load.TransportUnitId = null;
+
+                // Check if all loads in the job are completed
+                var allLoads = await _context.Loads
+                    .Where(l => l.JobId == jobId)
+                    .ToListAsync();
+
+                if (allLoads.All(l => l.Status == JobStatus.Completed))
+                {
+                    load.Job.Status = JobStatus.Completed;
+                    load.Job.UpdatedAt = DateTime.Now;
+                    
+                    TempData["SuccessMessage"] = $"Load marked as completed! All loads completed - job is now complete. Transport unit '{transportUnitName}' has been unassigned.";
+                }
+                else
+                {
+                    TempData["SuccessMessage"] = $"Load marked as completed! Transport unit '{transportUnitName}' has been unassigned.";
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while updating load status: " + ex.Message;
+            }
+
+            return RedirectToAction(nameof(Details), new { id = jobId });
         }
     }
 }

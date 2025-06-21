@@ -7,10 +7,10 @@
 
 <div class="content-header"><h2>Edit Job</h2></div>
 
-@if (Model.Status != JobStatus.Pending)
+@if (Model.Status != JobStatus.Pending && Model.Status != JobStatus.Approved)
 {
     <div class="alert alert-warning">
-        This job cannot be edited because its status is not Pending.
+        This job cannot be edited because its status is @Model.Status. Only Pending and Approved jobs can be edited.
     </div>
     <a asp-action="Index" class="btn btn-primary">Back to List</a>
 }

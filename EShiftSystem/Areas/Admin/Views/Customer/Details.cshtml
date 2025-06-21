@@ -1,0 +1,340 @@
+@model EShiftSystem.Models.Customer
+
+@{
+    ViewData["Title"] = "Customer Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="content-header">
+    <h2>Customer Details</h2>
+    <div class="action-buttons">
+        <a class="btn btn-outline me-2" asp-action="Edit" asp-route-id="@Model.CustomerId">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        @if (Model.IsActive)
+        {
+            <button type="button" class="btn btn-outline text-warning me-2" data-bs-toggle="modal" data-bs-target="#deactivateConfirmModal">
+                <i class="fas fa-user-slash"></i> Deactivate
+            </button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-success me-2" onclick="reactivateCustomer(@Model.CustomerId, '@Model.FullName')">
+                <i class="fas fa-user-check"></i> Reactivate
+            </button>
+        }
+        <a class="btn btn-outline" asp-action="Index">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>
+
+<div class="customer-details-container">
+    <!-- Customer Information Card -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Customer Information</h5>
+           
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Customer ID</dt>
+                        <dd class="col-sm-8"><strong class="text-primary">#@Model.CustomerId</strong></dd>
+
+                        <dt class="col-sm-4">Full Name</dt>
+                        <dd class="col-sm-8">@Model.FullName</dd>
+
+                        <dt class="col-sm-4">Username</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-secondary">@Model.ApplicationUser.UserName</span>
+                        </dd>
+
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">
+                            <a href="mailto:@Model.ApplicationUser.Email" class="text-decoration-none">
+                                <i class="fas fa-envelope me-1"></i>@Model.ApplicationUser.Email
+                            </a>
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Phone</dt>
+                        <dd class="col-sm-8">
+                            <a href="tel:@Model.Phone" class="text-decoration-none">
+                                <i class="fas fa-phone me-1"></i>@Model.Phone
+                            </a>
+                        </dd>
+
+                        <dt class="col-sm-4">Address</dt>
+                        <dd class="col-sm-8">
+                            <i class="fas fa-map-marker-alt me-1"></i>@Model.Address
+                        </dd>
+
+                        <dt class="col-sm-4">Total Jobs</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-@(Model.Jobs?.Count > 0 ? "success" : "secondary")">
+                                @(Model.Jobs?.Count ?? 0) Jobs
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Active Jobs</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-info">
+                                @(Model.Jobs?.Count(j => j.Status == EShiftSystem.Models.Enums.JobStatus.Pending || j.Status == EShiftSystem.Models.Enums.JobStatus.InProgress) ?? 0) Active
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Account Status</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">
+                                  Active
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">
+                                   Inactive
+                                </span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jobs History Card -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Jobs History</h5>
+            <span class="badge bg-secondary">@(Model.Jobs?.Count ?? 0) Jobs</span>
+        </div>
+        <div class="card-body">
+            @if (Model.Jobs != null && Model.Jobs.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Job Number</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Date</th>
+                                <th>Loads</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var job in Model.Jobs.OrderByDescending(j => j.JobId))
+                            {
+                                <tr>
+                                    <td>
+                                        <strong class="text-primary">@job.JobNumber</strong>
+                                    </td>
+                                    <td>
+                                        @if (job.JobTitle?.Length > 30)
+                                        {
+                                            <span title="@job.JobTitle">@job.JobTitle.Substring(0, 30)...</span>
+                                        }
+                                        else
+                                        {
+                                            @job.JobTitle
+                                        }
+                                    </td>
+                                    <td>
+                                        @{
+                                            var statusClass = job.Status switch
+                                            {
+                                                EShiftSystem.Models.Enums.JobStatus.Pending => "warning",
+                                                EShiftSystem.Models.Enums.JobStatus.Approved => "info",
+                                                EShiftSystem.Models.Enums.JobStatus.Rejected => "danger",
+                                                EShiftSystem.Models.Enums.JobStatus.InProgress => "primary",
+                                                EShiftSystem.Models.Enums.JobStatus.Delivered => "success",
+                                                EShiftSystem.Models.Enums.JobStatus.Completed => "success",
+                                                EShiftSystem.Models.Enums.JobStatus.Cancelled => "secondary",
+                                                _ => "secondary"
+                                            };
+                                        }
+                                        <span class="badge bg-@statusClass">@job.Status</span>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var priorityClass = job.Priority switch
+                                            {
+                                                EShiftSystem.Models.Enums.JobPriority.Normal => "info",
+                                                EShiftSystem.Models.Enums.JobPriority.High => "warning",
+                                                EShiftSystem.Models.Enums.JobPriority.Urgent => "danger",
+                                                _ => "secondary"
+                                            };
+                                        }
+                                        <span class="badge bg-@priorityClass">@job.Priority</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@job.JobDate.ToString("MMM dd, yyyy")</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@(job.Loads?.Count ?? 0)</span>
+                                    </td>
+                                    <td>
+                                        <a class="btn btn-sm btn-outline" asp-area="Admin" asp-controller="Job" asp-action="Details" asp-route-id="@job.JobId" title="View Job Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <div class="text-muted">
+                        <i class="fas fa-briefcase fa-3x mb-3 opacity-50"></i>
+                        <h6>No Jobs Found</h6>
+                        <p class="mb-0">This customer hasn't created any jobs yet.</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .customer-details-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+
+        .card-header {
+            background-color: rgba(0, 0, 0, 0.03);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        }
+
+        .badge {
+            font-weight: 500;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.025);
+        }
+
+        .text-muted {
+            color: #6c757d !important;
+        }
+
+        .opacity-50 {
+            opacity: 0.5 !important;
+        }
+
+        dt {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        dd {
+            margin-bottom: 0.5rem;
+        }
+
+                 .action-buttons .btn {
+             margin-left: 0.5rem;
+         }
+     </style>
+}
+
+<!-- Deactivate Confirmation Modal -->
+<div class="modal fade" id="deactivateConfirmModal" tabindex="-1" aria-labelledby="deactivateConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deactivateConfirmModalLabel">Confirm Deactivation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to deactivate this customer?</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Note:</strong> Deactivating a customer will hide them from the active customer list, but their data and job history will be preserved. You can reactivate them later if needed.
+                </div>
+              
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Customer ID</dt>
+                    <dd class="col-sm-8"><strong class="text-primary">#@Model.CustomerId</strong></dd>
+                    <dt class="col-sm-4">Full Name</dt>
+                    <dd class="col-sm-8">@Model.FullName</dd>
+                    <dt class="col-sm-4">Username</dt>
+                    <dd class="col-sm-8">@Model.ApplicationUser.UserName</dd>
+                    <dt class="col-sm-4">Email</dt>
+                    <dd class="col-sm-8">@Model.ApplicationUser.Email</dd>
+                    @if (Model.Jobs != null && Model.Jobs.Any())
+                    {
+                        <dt class="col-sm-4">Total Jobs</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-info">@Model.Jobs.Count jobs</span>
+                        </dd>
+                    }
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                <form asp-action="Deactivate" asp-route-id="@Model.CustomerId" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-user-slash"></i> Deactivate Customer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reactivate Confirmation Modal -->
+<div class="modal fade" id="reactivateConfirmModal" tabindex="-1" aria-labelledby="reactivateConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reactivateConfirmModalLabel">Confirm Reactivation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to reactivate this customer?</p>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Effect:</strong> The customer will be restored to active status and will be able to access their account normally.
+                </div>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Customer:</dt>
+                    <dd class="col-sm-8">@Model.FullName</dd>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                <form asp-action="Reactivate" asp-route-id="@Model.CustomerId" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-user-check"></i> Reactivate Customer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Reactivate customer function
+function reactivateCustomer(customerId, customerName) {
+    const modal = new bootstrap.Modal(document.getElementById('reactivateConfirmModal'));
+    modal.show();
+}
+</script>
+

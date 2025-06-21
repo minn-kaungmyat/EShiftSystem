@@ -149,6 +149,12 @@
                         </a>
                     </li>
                     <li>
+                        <a asp-area="Admin" asp-controller="Customer" asp-action="Index"
+                           class="@(currentController == "Customer" ? "active" : "")">
+                            <i class="fas fa-users"></i> Customers
+                        </a>
+                    </li>
+                    <li>
                         <a asp-area="Admin" asp-controller="Lorry" asp-action="Index"
                            class="@(currentController == "Lorry" ? "active" : "")"
                         >
@@ -184,19 +190,27 @@
                             <i class="fas fa-dolly"></i> Transport Units
                         </a>
                     </li>
+                   
                     
                 }
                 @if (isCustomer)
                 {
                     <li>
                         <a asp-area="Customer" asp-controller="Job" asp-action="Index"
-                           class="@(currentController == "Job" ? "active" : "")">
+                           class="@(currentController == "Job" && currentAction != "Create" ? "active" : "")">
                             <i class="fas fa-list"></i> My Jobs
                         </a>
                     </li>
                     <li>
-                        <a asp-area="Customer" asp-controller="Jobs" asp-action="Create">
-                            <i class="fas fa-plus-circle"></i> Create New Job
+                        <a asp-area="Customer" asp-controller="Job" asp-action="Create"
+                            class="@(currentController == "Job" && currentAction == "Create" ? "active" : "")">
+                            <i class="fas fa-plus-circle"></i> Book a Job
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-area="Customer" asp-controller="Profile" asp-action="Index"
+                           class="@(currentController == "Profile" ? "active" : "")">
+                            <i class="fas fa-user-circle"></i> Profile
                         </a>
                     </li>
 
@@ -267,11 +281,11 @@
     @await RenderSectionAsync("Scripts", required: false)
     
     <script>
-        // Auto-hide alerts after 5 seconds
+        // Auto-hide only dismissible alerts after 5 seconds (not permanent warning messages)
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
-                var alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
+                var dismissibleAlerts = document.querySelectorAll('.alert-dismissible');
+                dismissibleAlerts.forEach(function(alert) {
                     var bsAlert = new bootstrap.Alert(alert);
                     bsAlert.close();
                 });

@@ -10,6 +10,8 @@
 <table>
     <thead>
         <tr>
+            <th>Name</th>
+            <th>Status</th>
             <th>Lorry</th>
             <th>Driver</th>
             <th>Container</th>
@@ -21,6 +23,17 @@
         @foreach (var unit in Model)
         {
             <tr>
+                <td>@unit.Name</td>
+                <td>
+                    @if (unit.Status == EShiftSystem.Models.Enums.TransportUnitStatus.Available)
+                    {
+                        <span class="badge bg-success">Available</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning">Assigned</span>
+                    }
+                </td>
                 <td>@unit.Lorry?.LicensePlate</td>
                 <td>@unit.Driver?.Name</td>
                 <td>@unit.Container?.Type</td>
