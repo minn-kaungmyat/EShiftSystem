@@ -259,4 +259,68 @@
     .stat-number {
         font-size: 1.5rem;
     }
+}
+
+/* Charts Section Styles */
+.dashboard-charts {
+    margin-bottom: 2rem;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 2rem;
+}
+
+.chart-panel {
+    min-height: 400px;
+}
+
+.chart-container {
+    position: relative;
+    height: 280px;
+    width: 100%;
+}
+
+.chart-container canvas {
+    max-height: 280px;
+}
+
+/* Responsive Charts */
+@media (max-width: 1024px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .chart-panel {
+        min-height: 350px;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    .chart-container canvas {
+        max-height: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .chart-panel {
+        min-height: 320px;
+    }
+    
+    .chart-container {
+        height: 220px;
+    }
+    
+    .chart-container canvas {
+        max-height: 220px;
+    }
 } 

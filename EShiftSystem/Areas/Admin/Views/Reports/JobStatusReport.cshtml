@@ -1,0 +1,103 @@
+@model IEnumerable<EShiftSystem.Areas.Admin.Controllers.JobStatusReportItem>
+@using EShiftSystem.Models.Enums
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string GetStatusClass(JobStatus status) => status switch
+    {
+        JobStatus.Pending => "warning",
+        JobStatus.Approved => "info",
+        JobStatus.InProgress => "primary",
+        JobStatus.Delivered => "light-success",
+        JobStatus.Completed => "success",
+        JobStatus.Cancelled => "secondary",
+        _ => "secondary"
+    };
+}
+
+<div class="content-header">
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <h2>Job Status Report</h2>
+        <a href="@Url.Action("ExportJobStatusReport", "Reports", new { startDate = ViewBag.StartDate, endDate = ViewBag.EndDate })" 
+           class="btn btn-secondary">
+            <i class="fas fa-download"></i> Export CSV
+        </a>
+    </div>
+</div>
+
+<div class="search-filter-container">
+    <div class="search-filter-row">
+        <partial name="_DateFilter" />
+    </div>
+</div>
+
+<div>
+    <table id="jobStatusTable">
+        <thead>
+            <tr>
+                <th class="sortable" data-column="status">
+                    Status <i class="fas fa-sort sort-icon"></i>
+                </th>
+                <th class="sortable" data-column="count">
+                    Count <i class="fas fa-sort sort-icon"></i>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr data-status="@item.Status.ToString().ToLower()"
+                    data-count="@item.Count">
+                    <td>
+                        <span class="badge bg-@GetStatusClass(item.Status)">@item.Status</span>
+                    </td>
+                    <td>@item.Count</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Sorting functionality
+            const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+            const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
+                v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+            )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.addEventListener('click', (() => {
+                    const tbody = table.querySelector('tbody');
+                    Array.from(tbody.querySelectorAll('tr'))
+                        .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+                        .forEach(tr => tbody.appendChild(tr));
+                }));
+            });
+
+            // Update export button URL when dates change
+            function updateExportButton() {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const exportBtn = document.querySelector('a[href*="ExportJobStatusReport"]');
+                if (exportBtn) {
+                    let url = '@Url.Action("ExportJobStatusReport", "Reports")';
+                    const params = new URLSearchParams();
+                    if (startDate) params.append('startDate', startDate);
+                    if (endDate) params.append('endDate', endDate);
+                    if (params.toString()) {
+                        url += '?' + params.toString();
+                    }
+                    exportBtn.href = url;
+                }
+            }
+
+            // Listen for date changes
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            if (startDateInput) startDateInput.addEventListener('change', updateExportButton);
+            if (endDateInput) endDateInput.addEventListener('change', updateExportButton);
+        });
+    </script>
+} 

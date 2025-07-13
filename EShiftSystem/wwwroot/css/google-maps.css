@@ -1,0 +1,672 @@
+/* Google Maps Integration Styles */
+
+/* Map container styling */
+.map-container {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+}
+
+/* Minimalist map preview container for create form */
+.map-preview-container {
+    background: #f8f9fa;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e9ecef;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.map-header {
+    background: var(--bs-primary, #007bff);
+    color: white;
+    padding: 12px 16px;
+    font-weight: 500;
+    font-size: 0.9em;
+}
+
+.map-title {
+    display: flex;
+    align-items: center;
+}
+
+.minimalist-map {
+    flex: 1;
+    min-height: 350px;
+    background: #f8f9fa;
+    position: relative;
+}
+
+.map-status {
+    padding: 10px 16px;
+    background: white;
+    border-top: 1px solid #e9ecef;
+    text-align: center;
+}
+
+/* Override Google Maps controls for minimalist style */
+.minimalist-map .gm-style-cc {
+    display: none !important;
+}
+
+.minimalist-map .gm-bundled-control {
+    margin: 8px !important;
+}
+
+.minimalist-map .gm-bundled-control button {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.minimalist-map .gm-bundled-control button:hover {
+    background: white !important;
+}
+
+/* Address input styling with autocomplete */
+.address-input {
+    position: relative;
+}
+
+.address-input input {
+    padding-right: 40px;
+}
+
+.address-input::after {
+    content: '\f3c5';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    pointer-events: none;
+}
+
+/* Google Places Autocomplete Dropdown Styling */
+.pac-container {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e0e0e0;
+    margin-top: 2px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.pac-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.pac-item:hover {
+    background-color: #f8f9fa;
+}
+
+.pac-item-selected {
+    background-color: #007bff;
+    color: white;
+}
+
+.pac-item-query {
+    font-weight: 600;
+    color: #333;
+}
+
+.pac-item-selected .pac-item-query {
+    color: white;
+}
+
+.pac-matched {
+    font-weight: 700;
+}
+
+/* Route preview card styling */
+.route-preview-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.route-preview-card .card-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border-bottom: none;
+    padding: 16px 20px;
+}
+
+.route-preview-card .card-header h6 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.route-preview-card .card-body {
+    padding: 20px;
+}
+
+/* Map loading state */
+.map-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    color: #6c757d;
+    font-size: 1.1em;
+}
+
+.map-loading i {
+    margin-right: 8px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Location markers styling in details view */
+.location-marker {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 20px;
+    margin-bottom: 8px;
+    font-size: 0.95em;
+    border: 1px solid #e9ecef;
+}
+
+.location-marker i {
+    margin-right: 8px;
+    font-size: 1.1em;
+}
+
+.location-marker.start {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.location-marker.destination {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+/* Route info styling */
+.route-info {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.route-info .row > div {
+    display: flex;
+    align-items: center;
+}
+
+.route-info strong {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Map controls styling */
+.map-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.map-control-btn {
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.map-control-btn:hover {
+    background: #f8f9fa;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive map styling */
+@media (max-width: 768px) {
+    .route-preview-card .card-body {
+        padding: 16px;
+    }
+    
+    #map {
+        height: 250px !important;
+    }
+    
+    .minimalist-map {
+        min-height: 250px;
+    }
+    
+    .route-info {
+        padding: 12px;
+    }
+    
+    .location-marker {
+        font-size: 0.9em;
+        padding: 6px 10px;
+    }
+    
+    /* Stack form and map vertically on mobile */
+    .map-preview-container {
+        margin-top: 20px;
+    }
+    
+    .map-header {
+        padding: 10px 14px;
+        font-size: 0.85em;
+    }
+    
+    .map-status {
+        padding: 8px 14px;
+    }
+}
+
+@media (max-width: 576px) {
+    .minimalist-map {
+        min-height: 200px;
+    }
+}
+
+/* Enhanced form styling for address inputs */
+.address-form-group {
+    position: relative;
+}
+
+.address-form-group .form-control {
+    padding-left: 16px;
+    padding-right: 40px;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.address-form-group .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.address-form-group .address-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    pointer-events: none;
+    font-size: 1.1em;
+}
+
+/* Map error state */
+.map-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    background-color: #f8d7da;
+    border-radius: 8px;
+    color: #721c24;
+    font-size: 1.1em;
+    text-align: center;
+    padding: 20px;
+}
+
+.map-error i {
+    margin-right: 8px;
+    font-size: 1.3em;
+}
+
+/* Enhanced card styling for map sections */
+.map-card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.map-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.map-card .card-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border-bottom: none;
+    padding: 16px 20px;
+}
+
+.map-card .card-body {
+    padding: 0;
+}
+
+/* Google Maps info window styling */
+.gm-style .gm-style-iw-c {
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.gm-style .gm-style-iw-t::after {
+    background: white;
+}
+
+/* Location Section Styling - Prominent at Top */
+.location-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 2px solid #e3f2fd;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 123, 255, 0.08);
+    position: relative;
+}
+
+.location-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #007bff 0%, #28a745 50%, #dc3545 100%);
+}
+
+.location-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 20px 24px;
+    position: relative;
+}
+
+.location-header::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #0056b3;
+}
+
+.location-header-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.location-header-icon {
+    font-size: 2.2em;
+    opacity: 0.9;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; }
+}
+
+.location-title {
+    font-size: 1.4em;
+    font-weight: 600;
+    margin: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.location-subtitle {
+    font-size: 0.95em;
+    opacity: 0.9;
+    margin: 0;
+}
+
+/*.location-content {
+    padding: 32px 24px 24px;
+}*/
+
+/* Location Input Groups */
+.location-input-group {
+    position: relative;
+}
+
+.location-input-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.location-icon {
+    font-size: 1.2em;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.location-icon.start-icon {
+    color: #28a745;
+    text-shadow: 0 1px 2px rgba(40, 167, 69, 0.3);
+}
+
+.location-icon.end-icon {
+    color: #dc3545;
+    text-shadow: 0 1px 2px rgba(220, 53, 69, 0.3);
+}
+
+.location-label {
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+    font-size: 1.05em;
+}
+
+.location-input-wrapper {
+    position: relative;
+    margin-bottom: 4px;
+}
+
+.location-input {
+    padding: 14px 50px 14px 16px !important;
+    border: 2px solid #e9ecef !important;
+    border-radius: 10px !important;
+    font-size: 1.05em !important;
+    transition: all 0.3s ease !important;
+    background: white !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.location-input:focus {
+    border-color: #007bff !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-1px);
+}
+
+.location-search-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 1.1em;
+    pointer-events: none;
+    transition: color 0.3s ease;
+}
+
+.location-input:focus + .location-search-icon {
+    color: #007bff;
+}
+
+/* Job Details Section */
+.job-details-section {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+}
+
+.section-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 16px 24px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.section-title {
+    color: #495057;
+    font-weight: 600;
+    margin: 0;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+}
+
+.section-title::before {
+    content: '\f0f6';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    margin-right: 12px;
+    color: #6c757d;
+    font-size: 1.2em;
+}
+
+    .section-title.transport-route::before {
+        content: '\f4d7';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        margin-right: 12px;
+        color: #6c757d;
+        font-size: 1.2em;
+    }
+
+.job-details-section .row {
+    padding: 24px;
+}
+
+/* Enhanced form controls for job details */
+.job-details-section .form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    transition: all 0.2s ease;
+}
+
+.job-details-section .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+}
+
+/* Route Accordion - Minimalist Design */
+.route-summary {
+    flex: 1;
+}
+
+.route-summary .location-dot {
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+.route-summary .start-dot {
+    color: var(--bs-success, #28a745);
+}
+
+.route-summary .end-dot {
+    color: var(--bs-danger, #dc3545);
+}
+
+/* Clean accordion button styling */
+#routeAccordion .accordion-button {
+    background-color: var(--bs-light, #f8f9fa);
+    border: none;
+    padding: 1rem 1.25rem;
+    font-weight: 500;
+}
+
+#routeAccordion .accordion-button:not(.collapsed) {
+    background-color: var(--bs-light, #f8f9fa);
+    color: inherit;
+    box-shadow: none;
+}
+
+#routeAccordion .accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Map container in accordion */
+#routeAccordion .map-container {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* Remove old map styling that's too colorful */
+.map-card {
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.map-card .card-header {
+    background: var(--bs-light, #f8f9fa);
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+/* Responsive adjustments for location section */
+@media (max-width: 768px) {
+    .location-header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+    
+    .location-header-icon {
+        font-size: 1.8em;
+    }
+    
+    .location-title {
+        font-size: 1.2em;
+    }
+    
+    .location-content {
+        padding: 24px 16px 16px;
+    }
+    
+    .location-input-header {
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .job-details-section .row {
+        padding: 16px;
+    }
+    
+    /* Mobile route summary */
+    .route-summary .d-flex {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .route-summary .text-truncate {
+        max-width: 150px !important;
+    }
+}

@@ -35,8 +35,10 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Assistants</label>
-            <select asp-for="SelectedAssistantIds" asp-items="ViewBag.AssistantIds" class="form-control select2 select2-multiple" multiple="multiple"></select>
+            <label asp-for="SelectedAssistantIds">Assistants (Maximum 4)</label>
+            <select asp-for="SelectedAssistantIds" asp-items="ViewBag.AssistantIds" class="form-control select2 select2-multiple" multiple="multiple" id="assistantSelect"></select>
+            <span asp-validation-for="SelectedAssistantIds" class="text-danger"></span>
+            <small class="form-text text-muted">You can select up to 4 assistants for this transport unit.</small>
         </div>
 
 
@@ -45,17 +47,41 @@
     </div>
 </form>
 @section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
     <script>
         $(document).ready(function () {
-           $('.select2-multiple').select2({
-                placeholder: $(this).data('placeholder'), // Get placeholder from data attribute
-                allowClear: true
+            // Initialize Select2 for assistants with limit
+            $('#assistantSelect').select2({
+                placeholder: 'Select assistants (max 4)',
+                allowClear: true,
+                maximumSelectionLength: 4
             });
 
             // Initialize Select2 for single selection
             $('.select2-single').select2({
-                placeholder: $(this).data('placeholder'), // Get placeholder from data attribute
-                allowClear: true // Allow clearing the selection
+                placeholder: $(this).data('placeholder'),
+                allowClear: true
+            });
+
+            // Custom validation for assistant limit
+            $('#assistantSelect').on('select2:select', function(e) {
+                var selectedCount = $(this).val() ? $(this).val().length : 0;
+                if (selectedCount > 4) {
+                    $(this).val($(this).val().slice(0, 4)).trigger('change');
+                    alert('You can select a maximum of 4 assistants.');
+                }
+            });
+
+            // Form submission validation
+            $('form').on('submit', function(e) {
+                var selectedAssistants = $('#assistantSelect').val();
+                if (selectedAssistants && selectedAssistants.length > 4) {
+                    e.preventDefault();
+                    alert('Please select no more than 4 assistants.');
+                    return false;
+                }
             });
         });
     </script>

@@ -1,0 +1,31 @@
+<div class="date-filter">
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label for="startDate" class="form-label">Start Date</label>
+            <input type="date" id="startDate" name="startDate" class="form-control" value="@ViewBag.StartDate">
+        </div>
+        <div class="col-md-4">
+            <label for="endDate" class="form-label">End Date</label>
+            <input type="date" id="endDate" name="endDate" class="form-control" value="@ViewBag.EndDate">
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary">Apply Filter</button>
+            <a href="@Url.Action(ViewContext.RouteData.Values["action"].ToString())" class="btn btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.date-filter {
+    width: 100%;
+}
+
+.date-filter .form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.date-filter .btn {
+    margin-right: 0.5rem;
+}
+</style> 

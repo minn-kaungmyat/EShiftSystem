@@ -16,7 +16,6 @@
     {
         JobStatus.Pending => "warning",
         JobStatus.Approved => "info",
-        JobStatus.Rejected => "danger",
         JobStatus.InProgress => "primary",
         JobStatus.Delivered => "light-success",
         JobStatus.Completed => "success",
@@ -52,8 +51,8 @@
                     <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#approveModal">
                         <i class="fas fa-check"></i> Approve
                     </button>
-                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
-                        <i class="fas fa-times"></i> Reject
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                        <i class="fas fa-times"></i> Cancel
                     </button>
                 }
                 <span class="badge bg-@GetStatusClass(Model.Status) fs-6">@Model.Status</span>
@@ -117,6 +116,41 @@
         </div>
     </div>
 
+    <!-- Route Information -->
+    <div class="card mb-4">
+        <div class="accordion" id="routeAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#routeCollapse">
+                        <div class="d-flex w-100 align-items-center">
+                            <i class="fas fa-route text-primary me-3"></i>
+                            <div class="route-summary">
+                                <div class="d-flex align-items-center">
+                                    <span class="location-dot start-dot me-2">●</span>
+                                    <span class="text-truncate me-2" style="max-width: 200px;">@Model.StartLocation</span>
+                                    <i class="fas fa-arrow-right text-muted mx-2"></i>
+                                    <span class="location-dot end-dot me-2">●</span>
+                                    <span class="text-truncate" style="max-width: 200px;">@Model.Destination</span>
+                                </div>
+                            </div>
+                        </div>
+                    </button>
+                </h2>
+                <div id="routeCollapse" class="accordion-collapse collapse">
+                    <div class="accordion-body p-0">
+                        <div id="map" class="map-container" style="height: 350px; width: 100%;"
+                             data-start-lat="@Model.StartLatitude"
+                             data-start-lng="@Model.StartLongitude"
+                             data-dest-lat="@Model.DestinationLatitude"
+                             data-dest-lng="@Model.DestinationLongitude"
+                             data-start-address="@Model.StartLocation"
+                             data-dest-address="@Model.Destination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Loads</h5>
@@ -134,7 +168,7 @@
                                     <div class="d-flex w-100 justify-content-between align-items-center">
                                         <div>
                                             <i class="fas fa-truck me-2"></i>
-                                            @load.StartLocation <i class="fas fa-arrow-right mx-2"></i> @load.Destination
+                                            Load #@(Model.Loads.ToList().IndexOf(load) + 1)
                                         </div>
                                         <div class="d-flex align-items-center">
                                             @if (load.TransportUnit != null)
@@ -163,7 +197,7 @@
                                                     <h6 class="mb-0">Transport Unit Assignment</h6>
                                                 </div>
                                                 <div class="card-body">
-                                                    @if (Model.Status == JobStatus.Approved || Model.Status == JobStatus.InProgress)
+                                                    @if (Model.Status == JobStatus.Approved && load.Status != JobStatus.InProgress)
                                                     {
                                                         <form asp-action="AssignTransportUnit" method="post" class="mb-3">
                                                             <input type="hidden" name="jobId" value="@Model.JobId" />
@@ -184,7 +218,14 @@
                                                             </div>
                                                         </form>
                                                     }
-                                                    else
+                                                    else if (load.Status == JobStatus.InProgress)
+                                                    {
+                                                        <div class="alert alert-info">
+                                                            <i class="fas fa-lock me-2"></i>
+                                                            Transport unit assignment is locked - load is currently in progress.
+                                                        </div>
+                                                    }
+                                                    else if (Model.Status != JobStatus.Approved)
                                                     {
                                                         <div class="alert alert-warning">
                                                             <i class="fas fa-exclamation-triangle me-2"></i>
@@ -247,21 +288,25 @@
                                                     @if (load.LoadItems?.Any() == true)
                                                     {
                                                         <div class="table-responsive">
-                                                            <table class="table table-sm">
+                                                                                                                            <table class="table table-sm">
                                                                 <thead>
                                                                     <tr>
                                                                         <th>Item Type</th>
+                                                                        <th>Description</th>
                                                                         <th>Quantity</th>
-                                                                        <th>Note</th>
+                                                                        <th>Weight (kg)</th>
+                                                                        <th>Special Instructions</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
                                                                     @foreach (var item in load.LoadItems)
                                                                     {
                                                                         <tr>
-                                                                            <td>@item.ItemType</td>
+                                                                            <td><strong>@item.ItemType</strong></td>
+                                                                            <td>@(string.IsNullOrEmpty(item.Description) ? "-" : item.Description)</td>
                                                                             <td>@item.Quantity</td>
-                                                                            <td>@(string.IsNullOrEmpty(item.Note) ? "-" : item.Note)</td>
+                                                                            <td>@(item.WeightKg?.ToString("0.##") ?? "-")</td>
+                                                                            <td>@(string.IsNullOrEmpty(item.SpecialInstructions) ? "-" : item.SpecialInstructions)</td>
                                                                         </tr>
                                                                     }
                                                                 </tbody>
@@ -307,8 +352,8 @@
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
                             <strong>Load Details:</strong><br>
-                            From: @load.StartLocation<br>
-                            To: @load.Destination
+                            From: @Model.StartLocation<br>
+                            To: @Model.Destination
                         </div>
                         <div class="alert alert-warning">
                             <i class="fas fa-exclamation-triangle me-2"></i>
@@ -417,32 +462,32 @@
     </div>
 </div>
 
-<!-- Reject Job Modal -->
-<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+<!-- Cancel Job Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="rejectModalLabel">Reject Job</h5>
+                <h5 class="modal-title" id="cancelModalLabel">Cancel Job</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form asp-action="RejectJob" method="post">
+            <form asp-action="CancelJob" method="post">
                 <div class="modal-body">
                     <input type="hidden" name="jobId" value="@Model.JobId" />
-                    <p>Are you sure you want to reject this job?</p>
+                    <p>Are you sure you want to cancel this job?</p>
                     <div class="mb-3">
-                        <label for="rejectionReason" class="form-label">Rejection Reason (Optional)</label>
-                        <textarea class="form-control" id="rejectionReason" name="rejectionReason" rows="3" 
-                                  placeholder="Enter reason for rejection..."></textarea>
+                        <label for="cancellationReason" class="form-label">Cancellation Reason (Optional)</label>
+                        <textarea class="form-control" id="cancellationReason" name="cancellationReason" rows="3" 
+                                  placeholder="Enter reason for cancellation..."></textarea>
                     </div>
                     <div class="alert alert-warning">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        This action will mark the job as rejected and notify the customer.
+                        This action will mark the job as cancelled and release any assigned transport units.
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
                     <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-times"></i> Reject Job
+                        <i class="fas fa-times"></i> Cancel Job
                     </button>
                 </div>
             </form>

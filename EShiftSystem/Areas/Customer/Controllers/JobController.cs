@@ -4,6 +4,7 @@ using EShiftSystem.Models;
 using EShiftSystem.Models.Enums;
 using EShiftSystem.Services;
 using EShiftSystem.ViewModels;
+using EShiftSystem.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ using System.Linq;
 
 namespace EShiftSystem.Areas.Customer.Controllers
 {
+    // customer job controller for creating, editing and managing personal jobs
     [Authorize(Roles = "Customer")]
     [Area("Customer")]
     public class JobController : Controller
@@ -20,7 +22,9 @@ namespace EShiftSystem.Areas.Customer.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IJobNumberGenerator _jobNumberGenerator;
+        private const int PageSize = 10;
 
+        // initializes controller with database context, user manager and job number generator
         public JobController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IJobNumberGenerator jobNumberGenerator)
         {
             _context = context;
@@ -28,11 +32,20 @@ namespace EShiftSystem.Areas.Customer.Controllers
             _jobNumberGenerator = jobNumberGenerator;
         }
 
-        public async Task<IActionResult> Index()
+        // displays list of customer's jobs ordered by creation date
+        public async Task<IActionResult> Index(int? pageNumber)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             var customer = await _context.Customers.FirstOrDefaultAsync(c => c.ApplicationUserId == currentUser.Id);
-            return View(await _context.Jobs.Where(j => j.CustomerId == customer.CustomerId).OrderByDescending(j => j.CreatedAt).ToListAsync());
+            
+            var jobsQuery = _context.Jobs
+                .Where(j => j.CustomerId == customer.CustomerId)
+                .OrderByDescending(j => j.CreatedAt);
+
+            var pageIndex = pageNumber ?? 1;
+            var jobs = await PaginatedList<Job>.CreateAsync(jobsQuery, pageIndex, PageSize);
+
+            return View(jobs);
         }
 
         // GET: /Customer/Job/Details/5
@@ -59,16 +72,20 @@ namespace EShiftSystem.Areas.Customer.Controllers
             return View(job);
         }
 
-        // GET: /Customer/Job/Create
+        // displays job creation form with initial empty load and item
         [HttpGet]
         public IActionResult Create()
         {
-            var viewModel = new JobCreateViewModel();
+            var viewModel = new JobCreateViewModel
+            {
+                JobTitle = "",
+                StartLocation = "",
+                Destination = ""
+            };
             // Start the user off with one blank load form
-            // Changed initialization to use LoadItems and LoadItemViewModel
             viewModel.Loads.Add(new LoadViewModel { LoadItems = new List<LoadItemViewModel>() });
             // Optionally, add one blank item to the first load
-            viewModel.Loads[0].LoadItems.Add(new LoadItemViewModel());
+            viewModel.Loads[0].LoadItems.Add(new LoadItemViewModel { ItemType = "" });
 
             return View(viewModel);
         }
@@ -102,8 +119,15 @@ namespace EShiftSystem.Areas.Customer.Controllers
                     Description = viewModel.Description,
                     JobDate = viewModel.JobDate,
                     Priority = viewModel.Priority,
+                    StartLocation = viewModel.StartLocation,
+                    Destination = viewModel.Destination,
+                    StartLatitude = viewModel.StartLatitude,
+                    StartLongitude = viewModel.StartLongitude,
+                    DestinationLatitude = viewModel.DestinationLatitude,
+                    DestinationLongitude = viewModel.DestinationLongitude,
                     Status = JobStatus.Pending,
                     CustomerId = customer.CustomerId,
+                    Customer = customer,
                     CreatedAt = DateTime.Now,
                     Loads = new List<Load>()
                 };
@@ -114,28 +138,23 @@ namespace EShiftSystem.Areas.Customer.Controllers
                     {
                         var newLoad = new Load
                         {
-                            StartLocation = loadVm.StartLocation,
-                            Destination = loadVm.Destination,
                             Job = newJob,
-                            // Changed from Products to LoadItems
                             LoadItems = new List<LoadItem>()
                         };
 
-                        // Changed from loadVm.Products to loadVm.LoadItems
                         if (loadVm.LoadItems != null)
                         {
-                            // Changed from productVm to loadItemVm
                             foreach (var loadItemVm in loadVm.LoadItems)
                             {
-                                // Changed from productVm.Name to loadItemVm.ItemType
                                 if (!string.IsNullOrWhiteSpace(loadItemVm.ItemType))
                                 {
-                                    // Create a new LoadItem, not Product
                                     var newLoadItem = new LoadItem
                                     {
                                         ItemType = loadItemVm.ItemType,
+                                        Description = loadItemVm.Description,
                                         Quantity = loadItemVm.Quantity,
-                                        Note = loadItemVm.Note,
+                                        WeightKg = loadItemVm.WeightKg,
+                                        SpecialInstructions = loadItemVm.SpecialInstructions,
                                         Load = newLoad
                                     };
                                     newLoad.LoadItems.Add(newLoadItem);
@@ -143,7 +162,8 @@ namespace EShiftSystem.Areas.Customer.Controllers
                             }
                         }
 
-                        if (!string.IsNullOrWhiteSpace(newLoad.StartLocation))
+                        // Add load if it has items
+                        if (newLoad.LoadItems.Any())
                         {
                             newJob.Loads.Add(newLoad);
                         }
@@ -181,9 +201,9 @@ namespace EShiftSystem.Areas.Customer.Controllers
                 return NotFound();
             }
 
-            if (job.Status != JobStatus.Pending && job.Status != JobStatus.Approved)
+            if (job.Status != JobStatus.Pending)
             {
-                TempData["ErrorMessage"] = "Only pending and approved jobs can be edited.";
+                TempData["ErrorMessage"] = "Only pending jobs can be edited. Cancelled jobs cannot be modified.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -194,15 +214,22 @@ namespace EShiftSystem.Areas.Customer.Controllers
                 Description = job.Description,
                 JobDate = job.JobDate,
                 Priority = job.Priority,
+                StartLocation = job.StartLocation,
+                Destination = job.Destination,
+                StartLatitude = job.StartLatitude,
+                StartLongitude = job.StartLongitude,
+                DestinationLatitude = job.DestinationLatitude,
+                DestinationLongitude = job.DestinationLongitude,
                 Loads = job.Loads.Select(l => new LoadViewModel
                 {
-                    StartLocation = l.StartLocation,
-                    Destination = l.Destination,
                     LoadItems = l.LoadItems.Select(li => new LoadItemViewModel
                     {
                         ItemType = li.ItemType,
+                        Description = li.Description,
                         Quantity = li.Quantity,
-                        Note = li.Note
+                        WeightKg = li.WeightKg,
+                        SpecialInstructions = li.SpecialInstructions,
+
                     }).ToList()
                 }).ToList()
             };
@@ -228,9 +255,9 @@ namespace EShiftSystem.Areas.Customer.Controllers
                 return NotFound();
             }
 
-            if (job.Status != JobStatus.Pending && job.Status != JobStatus.Approved)
+            if (job.Status != JobStatus.Pending)
             {
-                TempData["ErrorMessage"] = "Only pending and approved jobs can be edited.";
+                TempData["ErrorMessage"] = "Only pending jobs can be edited. Cancelled jobs cannot be modified.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -243,6 +270,12 @@ namespace EShiftSystem.Areas.Customer.Controllers
                     job.Description = viewModel.Description;
                     job.JobDate = viewModel.JobDate;
                     job.Priority = viewModel.Priority;
+                    job.StartLocation = viewModel.StartLocation;
+                    job.Destination = viewModel.Destination;
+                    job.StartLatitude = viewModel.StartLatitude;
+                    job.StartLongitude = viewModel.StartLongitude;
+                    job.DestinationLatitude = viewModel.DestinationLatitude;
+                    job.DestinationLongitude = viewModel.DestinationLongitude;
                     job.UpdatedAt = DateTime.Now;
 
                     // Remove existing loads and items
@@ -260,8 +293,6 @@ namespace EShiftSystem.Areas.Customer.Controllers
                     {
                         var newLoad = new Load
                         {
-                            StartLocation = loadVm.StartLocation,
-                            Destination = loadVm.Destination,
                             Job = job,
                             LoadItems = new List<LoadItem>()
                         };
@@ -275,8 +306,10 @@ namespace EShiftSystem.Areas.Customer.Controllers
                                     var newLoadItem = new LoadItem
                                     {
                                         ItemType = loadItemVm.ItemType,
+                                        Description = loadItemVm.Description,
                                         Quantity = loadItemVm.Quantity,
-                                        Note = loadItemVm.Note,
+                                        WeightKg = loadItemVm.WeightKg,
+                                        SpecialInstructions = loadItemVm.SpecialInstructions,
                                         Load = newLoad
                                     };
                                     newLoad.LoadItems.Add(newLoadItem);
@@ -284,7 +317,8 @@ namespace EShiftSystem.Areas.Customer.Controllers
                             }
                         }
 
-                        if (!string.IsNullOrWhiteSpace(newLoad.StartLocation))
+                        // Add load if it has items
+                        if (newLoad.LoadItems.Any())
                         {
                             job.Loads.Add(newLoad);
                         }
@@ -465,6 +499,63 @@ namespace EShiftSystem.Areas.Customer.Controllers
             }
 
             return RedirectToAction(nameof(Details), new { id = jobId });
+        }
+
+        // POST: /Customer/Job/Cancel/5
+        [HttpPost, ActionName("Cancel")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelConfirmed(int id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.ApplicationUserId == currentUser.Id);
+            
+            var job = await _context.Jobs
+                .Include(j => j.Loads)
+                    .ThenInclude(l => l.LoadItems)
+                .Include(j => j.Loads)
+                    .ThenInclude(l => l.TransportUnit)
+                .FirstOrDefaultAsync(j => j.JobId == id && j.CustomerId == customer.CustomerId);
+
+            if (job == null)
+            {
+                TempData["ErrorMessage"] = "Job not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (job.Status != JobStatus.Pending)
+            {
+                TempData["ErrorMessage"] = "Only pending jobs can be cancelled.";
+                return RedirectToAction(nameof(Details), new { id = job.JobId });
+            }
+
+            try
+            {
+                // Update job status to cancelled instead of deleting
+                job.Status = JobStatus.Cancelled;
+                job.UpdatedAt = DateTime.Now;
+                
+                // Update all loads to cancelled status
+                foreach (var load in job.Loads)
+                {
+                    load.Status = JobStatus.Cancelled;
+                    
+                    // Release transport unit if assigned (though this shouldn't happen for pending jobs)
+                    if (load.TransportUnit != null)
+                    {
+                        load.TransportUnit.Status = TransportUnitStatus.Available;
+                        load.TransportUnitId = null;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Job cancelled successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = "An error occurred while cancelling the job.";
+                return RedirectToAction(nameof(Details), new { id = job.JobId });
+            }
         }
     }
 }

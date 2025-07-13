@@ -6,7 +6,7 @@
     ViewData["Title"] = "Create New Job";
 }
 
-<div class="content-header"><h2>Create Transport Unit</h2></div>
+<div class="content-header"><h2>Create Transport Job</h2></div>
 <div class="step-indicator">
     <div class="step" data-step="1">
         <div class="step-number">1</div>
@@ -26,6 +26,55 @@
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div id="step-1" class="step-content active">
+        <!-- Location Section -->
+        <div class="job-details-section mb-4">
+            <div class="section-header mb-3">
+                <h6 class="section-title transport-route">Transport Route</h6>
+            </div>
+            <div class="location-content">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="location-input-group mb-3">
+                            <div class="location-input-header">
+                                <i class="fas fa-map-marker-alt location-icon start-icon"></i>
+                                <label asp-for="StartLocation" class="location-label">Pickup Location</label>
+                            </div>
+                            <div class="location-input-wrapper">
+                                <input asp-for="StartLocation" class="form-control location-input" placeholder="Enter pickup address..." />
+                                <i class="fas fa-search location-search-icon"></i>
+                            </div>
+                            <span asp-validation-for="StartLocation" class="text-danger"></span>
+                        </div>
+                        <div class="location-input-group mb-3">
+                            <div class="location-input-header">
+                                <i class="fas fa-flag-checkered location-icon end-icon"></i>
+                                <label asp-for="Destination" class="location-label">Delivery Location</label>
+                            </div>
+                            <div class="location-input-wrapper">
+                                <input asp-for="Destination" class="form-control location-input" placeholder="Enter delivery address..." />
+                                <i class="fas fa-search location-search-icon"></i>
+                            </div>
+                            <span asp-validation-for="Destination" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Map Preview -->
+                        <div class="map-preview-container">
+                            <div id="map" class="minimalist-map"></div>
+                            <div class="map-status">
+                                <small class="text-muted">Select addresses to view route</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Details Section -->
+        <div class="job-details-section">
+            <div class="section-header mb-3">
+                <h6 class="section-title">Job Information</h6>
+            </div>
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group mb-3">
@@ -34,17 +83,17 @@
                     <span asp-validation-for="JobTitle" class="text-danger"></span>
                 </div>
                 <div class="form-group mb-3">
-                    <label asp-for="Priority" class="control-label"></label>
-                    <select asp-for="Priority" asp-items="Html.GetEnumSelectList<EShiftSystem.Models.Enums.JobPriority>()" class="form-control"></select>
-                    <span asp-validation-for="Priority" class="text-danger"></span>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group mb-3">
                     <label asp-for="JobDate" class="control-label"></label>
                     <input asp-for="JobDate" type="date" class="form-control" />
                     <span asp-validation-for="JobDate" class="text-danger"></span>
                 </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="Priority" class="control-label"></label>
+                        <select asp-for="Priority" asp-items="Html.GetEnumSelectList<EShiftSystem.Models.Enums.JobPriority>()" class="form-control"></select>
+                        <span asp-validation-for="Priority" class="text-danger"></span>
+                    </div>
                 <div class="form-group mb-3">
                     <label asp-for="Description" class="control-label"></label>
                     <textarea asp-for="Description" class="form-control" rows="3"></textarea>
@@ -52,6 +101,13 @@
                 </div>
             </div>
         </div>
+        </div>
+
+        <!-- Hidden coordinate fields for Google Maps -->
+        <input type="hidden" asp-for="StartLatitude" />
+        <input type="hidden" asp-for="StartLongitude" />
+        <input type="hidden" asp-for="DestinationLatitude" />
+        <input type="hidden" asp-for="DestinationLongitude" />
     </div>
 
     <div id="step-2" class="step-content">
@@ -63,55 +119,65 @@
                         <h5 class="load-title mb-0">Load #@(i + 1)</h5>
                         @if (Model.Loads.Count > 1)
                         {
-                            <button type="button" class="btn btn-sm btn-outline-danger remove-load-btn">X</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-load-btn" style="font-size: 16px;">x</button>
                         }
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="Loads[i].StartLocation" class="control-label"></label>
-                                    <input asp-for="Loads[i].StartLocation" class="form-control" />
-                                    <span asp-validation-for="Loads[i].StartLocation" class="text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="Loads[i].Destination" class="control-label"></label>
-                                    <input asp-for="Loads[i].Destination" class="form-control" />
-                                    <span asp-validation-for="Loads[i].Destination" class="text-danger"></span>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="custom-divider">
                             <span class="divider-text">Items in this Load</span>
                         </div>
                         <div class="load-items-container" data-load-index="@i">
                             @for (var j = 0; j < Model.Loads[i].LoadItems.Count; j++)
                             {
-                                <div class="row load-item-entry align-items-center">
-                                    <div class="col-md-5 form-group mb-3">
-                                        <label asp-for="Loads[i].LoadItems[j].ItemType"></label>
-                                        <input asp-for="Loads[i].LoadItems[j].ItemType" class="form-control" placeholder="e.g., Furniture, Boxes" />
-                                        <span asp-validation-for="Loads[i].LoadItems[j].ItemType" class="text-danger"></span>
-                                    </div>
-                                    <div class="col-md-3 form-group mb-3">
-                                        <label asp-for="Loads[i].LoadItems[j].Quantity"></label>
-                                        <input asp-for="Loads[i].LoadItems[j].Quantity" class="form-control" type="number" value="1" />
-                                        <span asp-validation-for="Loads[i].LoadItems[j].Quantity" class="text-danger"></span>
-                                    </div>
-                                    <div class="col-md-3 form-group mb-3">
-                                        <label asp-for="Loads[i].LoadItems[j].Note"></label>
-                                        <input asp-for="Loads[i].LoadItems[j].Note" class="form-control" type="text" placeholder="e.g., Fragile, Heavy" />
-                                        <span asp-validation-for="Loads[i].LoadItems[j].Note" class="text-danger"></span>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <label>&nbsp;</label>
-                                        @if (Model.Loads[i].LoadItems.Count > 1)
-                                        {
-                                            <button type="button" class="btn btn-sm btn-outline-danger remove-load-item-btn">X</button>
-                                        }
+                                <div class="load-item-entry border-bottom pb-3 mb-3">
+                                    <div class="row">
+                                        <div class="col-md-2 form-group mb-3">
+                                            <label asp-for="Loads[i].LoadItems[j].ItemType"></label>
+                                            <select asp-for="Loads[i].LoadItems[j].ItemType" class="form-control">
+                                                <option value="">Select Item Type</option>
+                                                <option value="Box">Box</option>
+                                                <option value="Furniture">Furniture</option>
+                                                <option value="Electronics">Electronics</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                            <span asp-validation-for="Loads[i].LoadItems[j].ItemType" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-2 form-group mb-3">
+                                            <label asp-for="Loads[i].LoadItems[j].Description"></label>
+                                            <input asp-for="Loads[i].LoadItems[j].Description" class="form-control" placeholder="Item description (optional)" />
+                                            <span asp-validation-for="Loads[i].LoadItems[j].Description" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-1 form-group mb-3">
+                                            <label asp-for="Loads[i].LoadItems[j].Quantity"></label>
+                                            <input asp-for="Loads[i].LoadItems[j].Quantity" class="form-control" type="number" value="1" min="1" />
+                                            <span asp-validation-for="Loads[i].LoadItems[j].Quantity" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-2 form-group mb-3">
+                                            <label asp-for="Loads[i].LoadItems[j].WeightKg"></label>
+                                                                                            <input asp-for="Loads[i].LoadItems[j].WeightKg" class="form-control" type="number" step="any" min="0.1" placeholder="Optional" />
+                                            <small class="form-text text-muted">Estimated weight</small>
+                                            <span asp-validation-for="Loads[i].LoadItems[j].WeightKg" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-4 form-group mb-3">
+                                            <label asp-for="Loads[i].LoadItems[j].SpecialInstructions"></label>
+                                            <select asp-for="Loads[i].LoadItems[j].SpecialInstructions" class="form-control">
+                                                <option value="">No special instructions</option>
+                                                <option value="Fragile">Fragile</option>
+                                                <option value="Keep Upright">Keep Upright</option>
+                                                <option value="Heavy Item">Heavy Item</option>
+                                                <option value="Handle with Care">Handle with Care</option>
+                                                <option value="Temperature Sensitive">Temperature Sensitive</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                            <span asp-validation-for="Loads[i].LoadItems[j].SpecialInstructions" class="text-danger"></span>
+                                        </div>
+                                                                                    <div class="col-auto">
+                                                <label>&nbsp;</label>
+                                                @if (Model.Loads[i].LoadItems.Count > 1)
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-danger remove-load-item-btn" style="font-size: 16px;">x</button>
+                                                }
+                                            </div>
                                     </div>
                                 </div>
                             }
@@ -213,6 +279,8 @@
                 let reviewHtml = '<h5>Job Details</h5>';
                 reviewHtml += `<p><strong>Job Title:</strong> ${$('#JobTitle').val()}</p>`;
                 reviewHtml += `<p><strong>Job Date:</strong> ${$('#JobDate').val()}</p>`;
+                reviewHtml += `<p><strong>Start Location:</strong> ${$('#StartLocation').val()}</p>`;
+                reviewHtml += `<p><strong>Destination:</strong> ${$('#Destination').val()}</p>`;
                 reviewHtml += `<p><strong>Description:</strong> ${$('#Description').val()}</p>`;
                 reviewHtml += `<p><strong>Priority:</strong> ${$('#Priority option:selected').text()}</p>`;
 
@@ -223,18 +291,25 @@
                     $('#loads-container .load-entry').each(function (loadIndex, loadElement) {
                         reviewHtml += `<div class="card mb-3"><div class="card-body">`;
                         reviewHtml += `<h6>Load #${loadIndex + 1}</h6>`;
-                        reviewHtml += `<p><strong>Start Location:</strong> ${$(loadElement).find(`[name="Loads[${loadIndex}].StartLocation"]`).val()}</p>`;
-                        reviewHtml += `<p><strong>Destination:</strong> ${$(loadElement).find(`[name="Loads[${loadIndex}].Destination"]`).val()}</p>`;
+                        // Job-level locations are shown in job summary, not per load
 
                         reviewHtml += `<h6>Items:</h6>`;
                         let itemCount = 0;
                         $(loadElement).find('.load-item-entry').each(function (itemIndex, itemElement) {
                             const itemType = $(itemElement).find(`[name="Loads[${loadIndex}].LoadItems[${itemIndex}].ItemType"]`).val();
+                            const itemDescription = $(itemElement).find(`[name="Loads[${loadIndex}].LoadItems[${itemIndex}].Description"]`).val();
                             const itemQuantity = $(itemElement).find(`[name="Loads[${loadIndex}].LoadItems[${itemIndex}].Quantity"]`).val();
-                            const itemNote = $(itemElement).find(`[name="Loads[${loadIndex}].LoadItems[${itemIndex}].Note"]`).val();
+                            const itemWeight = $(itemElement).find(`[name="Loads[${loadIndex}].LoadItems[${itemIndex}].WeightKg"]`).val();
+                            const itemSpecialInstructions = $(itemElement).find(`[name="Loads[${loadIndex}].LoadItems[${itemIndex}].SpecialInstructions"]`).val();
 
-                            if (itemType || itemQuantity || itemNote) {
-                                reviewHtml += `<p class="mb-0 ms-3">- <strong>${itemType}</strong> (Qty: ${itemQuantity}, Note: ${itemNote})</p>`;
+                            if (itemType || itemQuantity || itemDescription || itemWeight || itemSpecialInstructions) {
+                                let itemDetails = `<strong>${itemType || 'Not specified'}</strong>`;
+                                if (itemDescription) itemDetails += ` - ${itemDescription}`;
+                                itemDetails += ` (Qty: ${itemQuantity || 1}`;
+                                if (itemWeight) itemDetails += `, Weight: ${itemWeight}kg`;
+                                if (itemSpecialInstructions) itemDetails += `, Special: ${itemSpecialInstructions}`;
+                                itemDetails += ')';
+                                reviewHtml += `<p class="mb-0 ms-3">- ${itemDetails}</p>`;
                                 itemCount++;
                             }
                         });
@@ -311,14 +386,14 @@
                     });
 
                     $(loadElement).find('.load-item-entry').each(function (itemIndex, itemElement) {
-                        $(itemElement).find('input, span[data-valmsg-for]').each(function () {
+                        $(itemElement).find('input, select, span[data-valmsg-for]').each(function () {
                             var originalName = $(this).attr('name') || $(this).attr('data-valmsg-for');
                             if (originalName) {
                                 var newName = originalName
                                     .replace(/Loads\[\d+\]/, 'Loads[' + loadIndex + ']')
                                     .replace(/LoadItems\[\d+\]/, 'LoadItems[' + itemIndex + ']');
 
-                                if ($(this).is('input')) {
+                                if ($(this).is('input') || $(this).is('select')) {
                                     $(this).attr('name', newName);
                                     var originalId = $(this).attr('id');
                                     if (originalId) {
@@ -350,7 +425,7 @@
                     const removeBtn = $(this).find('.remove-load-btn');
                     if ($('.load-entry').length > 1) {
                         if (removeBtn.length === 0) {
-                            $(this).find('.card-header').append('<button type="button" class="btn btn-sm btn-outline-danger remove-load-btn">X</button>');
+                            $(this).find('.card-header').append('<button type="button" class="btn btn-sm btn-outline-danger remove-load-btn" style="font-size: 16px;">x</button>');
                         }
                     } else {
                         removeBtn.remove();
@@ -361,13 +436,15 @@
                 $('.load-items-container').each(function() {
                     const items = $(this).find('.load-item-entry');
                     items.each(function() {
-                        const removeBtn = $(this).find('.remove-load-item-btn');
+                        const buttonContainer = $(this).find('.col-auto');
+                        const existingBtn = buttonContainer.find('.remove-load-item-btn');
+                        
                         if (items.length > 1) {
-                            if (removeBtn.length === 0) {
-                                $(this).find('.col-md-1').append('<button type="button" class="btn btn-sm btn-outline-danger remove-load-item-btn">X</button>');
+                            if (existingBtn.length === 0) {
+                                buttonContainer.append('<button type="button" class="btn btn-sm btn-outline-danger remove-load-item-btn" style="font-size: 16px;">x</button>');
                             }
                         } else {
-                            removeBtn.remove();
+                            existingBtn.remove();
                         }
                     });
                 });
@@ -379,25 +456,52 @@
                 var itemIndex = loadItemsContainer.find('.load-item-entry').length;
 
                 var newLoadItemHtml = `
-                <div class="row load-item-entry align-items-center">
-                    <div class="col-md-5 form-group mb-3">
-                        <label>Item Type</label>
-                        <input class="form-control" type="text" name="Loads[${loadIndex}].LoadItems[${itemIndex}].ItemType" data-val="true" data-val-required="The Item Type field is required" placeholder="e.g., Furniture, Boxes" />
-                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[${itemIndex}].ItemType" data-valmsg-replace="true"></span>
-                    </div>
-                    <div class="col-md-3 form-group mb-3">
-                        <label>Quantity</label>
-                        <input class="form-control" type="number" name="Loads[${loadIndex}].LoadItems[${itemIndex}].Quantity" data-val="true" data-val-required="The Quantity field is required" data-val-number="The field Quantity must be a number" value="1" />
-                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[${itemIndex}].Quantity" data-valmsg-replace="true"></span>
-                    </div>
-                    <div class="col-md-3 form-group mb-3">
-                        <label>Note</label>
-                        <input class="form-control" type="text" name="Loads[${loadIndex}].LoadItems[${itemIndex}].Note" placeholder="e.g., Fragile, Heavy" />
-                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[${itemIndex}].Note" data-valmsg-replace="true"></span>
-                    </div>
-                    <div class="col-md-1">
-                        <label>&nbsp;</label>
-                        <button type="button" class="btn btn-sm btn-outline-danger remove-load-item-btn">X</button>
+                <div class="load-item-entry border-bottom pb-3 mb-3">
+                    <div class="row">j
+                        <div class="col-md-2 form-group mb-3">
+                            <label>Item Type</label>
+                            <select class="form-control" name="Loads[${loadIndex}].LoadItems[${itemIndex}].ItemType" data-val="true" data-val-required="The Item Type field is required">
+                                <option value="">Select Item Type</option>
+                                <option value="Box">Box</option>
+                                <option value="Furniture">Furniture</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[${itemIndex}].ItemType" data-valmsg-replace="true"></span>
+                        </div>
+                        <div class="col-md-2 form-group mb-3">
+                            <label>Description</label>
+                            <input class="form-control" type="text" name="Loads[${loadIndex}].LoadItems[${itemIndex}].Description" placeholder="Item description (optional)" />
+                            <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[${itemIndex}].Description" data-valmsg-replace="true"></span>
+                        </div>
+                        <div class="col-md-1 form-group mb-3">
+                            <label>Quantity</label>
+                            <input class="form-control" type="number" name="Loads[${loadIndex}].LoadItems[${itemIndex}].Quantity" data-val="true" data-val-required="The Quantity field is required" data-val-number="The field Quantity must be a number" value="1" min="1" />
+                            <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[${itemIndex}].Quantity" data-valmsg-replace="true"></span>
+                        </div>
+                        <div class="col-md-2 form-group mb-3">
+                            <label>Weight (kg)</label>
+                                                            <input class="form-control" type="number" name="Loads[${loadIndex}].LoadItems[${itemIndex}].WeightKg" step="any" min="0.1" placeholder="Optional" />
+                            <small class="form-text text-muted">Estimated weight</small>
+                            <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[${itemIndex}].WeightKg" data-valmsg-replace="true"></span>
+                        </div>
+                        <div class="col-md-4 form-group mb-3">
+                            <label>Special Instructions</label>
+                            <select class="form-control" name="Loads[${loadIndex}].LoadItems[${itemIndex}].SpecialInstructions">
+                                <option value="">No special instructions</option>
+                                <option value="Fragile">Fragile</option>
+                                <option value="Keep Upright">Keep Upright</option>
+                                <option value="Heavy Item">Heavy Item</option>
+                                <option value="Handle with Care">Handle with Care</option>
+                                <option value="Temperature Sensitive">Temperature Sensitive</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[${itemIndex}].SpecialInstructions" data-valmsg-replace="true"></span>
+                        </div>
+                        <div class="col-auto">
+                            <label>&nbsp;</label>
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-load-item-btn" style="font-size: 16px;">x</button>
+                        </div>
                     </div>
                 </div>`;
 
@@ -423,49 +527,59 @@
                 <div class="card mb-3 load-entry">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="load-title mb-0">Load #${loadIndex + 1}</h5>
-                        <button type="button" class="btn btn-sm btn-outline-danger remove-load-btn">X</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-load-btn" style="font-size: 16px;">x</button>
                     </div>
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label>Start Location</label>
-                                    <input class="form-control" type="text" name="Loads[${loadIndex}].StartLocation" data-val="true" data-val-required="The Start Location field is required" placeholder="Start Location" />
-                                    <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].StartLocation" data-valmsg-replace="true"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label>Destination</label>
-                                    <input class="form-control" type="text" name="Loads[${loadIndex}].Destination" data-val="true" data-val-required="The Destination field is required" placeholder="Destination" />
-                                    <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].Destination" data-valmsg-replace="true"></span>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="custom-divider">
                             <span class="divider-text">Items in this Load</span>
                         </div>
                         <div class="load-items-container" data-load-index="${loadIndex}">
-                            <div class="row load-item-entry align-items-center">
-                                <div class="col-md-5 form-group mb-3">
-                                    <label>Item Type</label>
-                                    <input class="form-control" type="text" name="Loads[${loadIndex}].LoadItems[0].ItemType" data-val="true" data-val-required="The Item Type field is required" placeholder="e.g., Furniture, Boxes" />
-                                    <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[0].ItemType" data-valmsg-replace="true"></span>
-                                </div>
-                                <div class="col-md-3 form-group mb-3">
-                                    <label>Quantity</label>
-                                    <input class="form-control" type="number" name="Loads[${loadIndex}].LoadItems[0].Quantity" data-val="true" data-val-required="The Quantity field is required" data-val-number="The field Quantity must be a number" value="1" />
-                                    <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[0].Quantity" data-valmsg-replace="true"></span>
-                                </div>
-                                <div class="col-md-3 form-group mb-3">
-                                    <label>Note</label>
-                                    <input class="form-control" type="text" name="Loads[${loadIndex}].LoadItems[0].Note" placeholder="e.g., Fragile, Heavy" />
-                                    <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[0].Note" data-valmsg-replace="true"></span>
-                                </div>
-                                <div class="col-md-1">
-                                    <label>&nbsp;</label>
-                                    <button type="button" class="btn btn-sm btn-outline-danger remove-load-item-btn">X</button>
+                            <div class="load-item-entry border-bottom pb-3 mb-3">
+                                <div class="row">
+                                    <div class="col-md-2 form-group mb-3">
+                                        <label>Item Type</label>
+                                        <select class="form-control" name="Loads[${loadIndex}].LoadItems[0].ItemType" data-val="true" data-val-required="The Item Type field is required">
+                                            <option value="">Select Item Type</option>
+                                            <option value="Box">Box</option>
+                                            <option value="Furniture">Furniture</option>
+                                            <option value="Electronics">Electronics</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[0].ItemType" data-valmsg-replace="true"></span>
+                                    </div>
+                                    <div class="col-md-2 form-group mb-3">
+                                        <label>Description</label>
+                                        <input class="form-control" type="text" name="Loads[${loadIndex}].LoadItems[0].Description" placeholder="Item description (optional)" />
+                                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[0].Description" data-valmsg-replace="true"></span>
+                                    </div>
+                                    <div class="col-md-1 form-group mb-3">
+                                        <label>Quantity</label>
+                                        <input class="form-control" type="number" name="Loads[${loadIndex}].LoadItems[0].Quantity" data-val="true" data-val-required="The Quantity field is required" data-val-number="The field Quantity must be a number" value="1" min="1" />
+                                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[0].Quantity" data-valmsg-replace="true"></span>
+                                    </div>
+                                    <div class="col-md-2 form-group mb-3">
+                                        <label>Weight (kg)</label>
+                                                                                    <input class="form-control" type="number" name="Loads[${loadIndex}].LoadItems[0].WeightKg" step="any" min="0.1" placeholder="Optional" />
+                                        <small class="form-text text-muted">Estimated weight</small>
+                                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[0].WeightKg" data-valmsg-replace="true"></span>
+                                    </div>
+                                    <div class="col-md-4 form-group mb-3">
+                                        <label>Special Instructions</label>
+                                        <select class="form-control" name="Loads[${loadIndex}].LoadItems[0].SpecialInstructions">
+                                            <option value="">No special instructions</option>
+                                            <option value="Fragile">Fragile</option>
+                                            <option value="Keep Upright">Keep Upright</option>
+                                            <option value="Heavy Item">Heavy Item</option>
+                                            <option value="Handle with Care">Handle with Care</option>
+                                            <option value="Temperature Sensitive">Temperature Sensitive</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                        <span class="text-danger field-validation-valid" data-valmsg-for="Loads[${loadIndex}].LoadItems[0].SpecialInstructions" data-valmsg-replace="true"></span>
+                                    </div>
+                                    <div class="col-auto">
+                                        <label>&nbsp;</label>
+                                        <button type="button" class="btn btn-sm btn-outline-danger remove-load-item-btn" style="font-size: 16px;">x</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

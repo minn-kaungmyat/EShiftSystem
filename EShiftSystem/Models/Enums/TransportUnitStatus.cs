@@ -1,8 +1,9 @@
 namespace EShiftSystem.Models.Enums
 {
+    // defines operational status of transport units for resource management
     public enum TransportUnitStatus
     {
-        Available,        // Ready to be assigned to a load
-        Assigned          // Already assigned to a load (not reusable until released)
+        Available,        // ready to be assigned to a load
+        Assigned          // already assigned to a load (not reusable until released)
     }
 } 

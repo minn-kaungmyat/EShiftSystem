@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using EShiftSystem.Models;
+using EShiftSystem.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace EShiftSystem.Areas.Identity.Pages.Account
 {
@@ -18,11 +20,13 @@ namespace EShiftSystem.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly ApplicationDbContext _context;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger, ApplicationDbContext context)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _context = context;
         }
 
         /// <summary>
@@ -114,6 +118,18 @@ namespace EShiftSystem.Areas.Identity.Pages.Account
                     // Fetch the user and their roles
                     var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
                     var roles = await _signInManager.UserManager.GetRolesAsync(user);
+
+                    // Check if user is a customer and if they are active
+                    if (roles.Contains("Customer"))
+                    {
+                        var customer = await _context.Customers.FirstOrDefaultAsync(c => c.ApplicationUserId == user.Id);
+                        if (customer == null || !customer.IsActive)
+                        {
+                            await _signInManager.SignOutAsync();
+                            ModelState.AddModelError(string.Empty, "Your account has been deactivated. Please contact support for assistance.");
+                            return Page();
+                        }
+                    }
 
                     if (roles.Contains("Admin"))
                     {

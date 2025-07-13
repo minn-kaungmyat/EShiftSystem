@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
+using System;   
 using System.Linq;
 using System.Threading.Tasks;
 using EShiftSystem.Data;
@@ -63,5 +63,24 @@ namespace EShiftSystem.Data
                 }
             }
         }
+
+        //// Method to clear all job-related data
+        //public static async Task ClearJobDataAsync(ApplicationDbContext context)
+        //{
+        //    // Remove all load items
+        //    var loadItems = context.LoadItems.ToList();
+        //    context.LoadItems.RemoveRange(loadItems);
+
+        //    // Remove all loads
+        //    var loads = context.Loads.ToList();
+        //    context.Loads.RemoveRange(loads);
+
+        //    // Remove all jobs
+        //    var jobs = context.Jobs.ToList();
+        //    context.Jobs.RemoveRange(jobs);
+
+        //    await context.SaveChangesAsync();
+        //    Console.WriteLine("All job data has been cleared successfully.");
+        //}
     }
 }

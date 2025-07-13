@@ -17,6 +17,7 @@
     <title>@ViewData["Title"] - EShiftSystem</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/google-maps.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/EShiftSystem.styles.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -190,6 +191,12 @@
                             <i class="fas fa-dolly"></i> Transport Units
                         </a>
                     </li>
+                    <li>
+                        <a asp-area="Admin" asp-controller="Reports" asp-action="Index"
+                           class="@(currentController == "Reports" ? "active" : "")">
+                            <i class="fas fa-chart-bar"></i> Reports
+                        </a>
+                    </li>
                    
                     
                 }
@@ -277,6 +284,10 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/google-maps.js" asp-append-version="true"></script>
+    
+    <!-- Google Maps JavaScript API -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDtcU9ln2mFTbWZHXpwJZCe7x9qc4MnH64&libraries=places&callback=initGoogleMaps"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
     

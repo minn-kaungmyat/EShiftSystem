@@ -225,6 +225,19 @@ namespace EShiftSystem.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("DestinationLatitude")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DestinationLongitude")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<DateTime>("JobDate")
                         .HasColumnType("datetime2");
 
@@ -240,6 +253,19 @@ namespace EShiftSystem.Data.Migrations
 
                     b.Property<int>("Priority")
                         .HasColumnType("int");
+
+                    b.Property<string>("StartLatitude")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("StartLocation")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("StartLongitude")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -268,18 +294,8 @@ namespace EShiftSystem.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Destination")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<int>("JobId")
                         .HasColumnType("int");
-
-                    b.Property<string>("StartLocation")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -307,6 +323,10 @@ namespace EShiftSystem.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LoadItemId"));
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("ItemType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -314,11 +334,15 @@ namespace EShiftSystem.Data.Migrations
                     b.Property<int>("LoadId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("SpecialInstructions")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal?>("WeightKg")
+                        .HasColumnType("decimal(10,2)");
 
                     b.HasKey("LoadItemId");
 
@@ -574,7 +598,7 @@ namespace EShiftSystem.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("EShiftSystem.Models.TransportUnit", "TransportUnit")
-                        .WithMany()
+                        .WithMany("Loads")
                         .HasForeignKey("TransportUnitId")
                         .OnDelete(DeleteBehavior.Restrict);
 
@@ -690,6 +714,8 @@ namespace EShiftSystem.Data.Migrations
             modelBuilder.Entity("EShiftSystem.Models.TransportUnit", b =>
                 {
                     b.Navigation("Assistants");
+
+                    b.Navigation("Loads");
                 });
 #pragma warning restore 612, 618
         }

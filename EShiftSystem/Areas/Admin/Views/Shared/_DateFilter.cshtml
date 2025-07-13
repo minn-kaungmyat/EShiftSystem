@@ -1,0 +1,52 @@
+@{
+    var startDate = ViewBag.StartDate;
+    var endDate = ViewBag.EndDate;
+}
+
+<div class="filter-section">
+    <div class="filter-group">
+        <label for="startDate" class="filter-label">Start Date:</label>
+        <input type="date" id="startDate" name="startDate" class="filter-input" value="@startDate">
+    </div>
+    
+    <div class="filter-group">
+        <label for="endDate" class="filter-label">End Date:</label>
+        <input type="date" id="endDate" name="endDate" class="filter-input" value="@endDate">
+    </div>
+    
+    <button type="button" id="applyDateFilter" class="btn btn-primary btn-sm">
+        <i class="fas fa-filter"></i> Apply
+    </button>
+    
+    <button type="button" id="clearDateFilter" class="btn btn-outline btn-sm">
+        <i class="fas fa-times"></i> Clear
+    </button>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const applyButton = document.getElementById('applyDateFilter');
+        const clearButton = document.getElementById('clearDateFilter');
+
+        applyButton.addEventListener('click', function () {
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+            
+            const url = new URL(window.location.href);
+            if (startDate) url.searchParams.set('startDate', startDate);
+            if (endDate) url.searchParams.set('endDate', endDate);
+            
+            window.location.href = url.toString();
+        });
+
+        clearButton.addEventListener('click', function () {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('startDate');
+            url.searchParams.delete('endDate');
+            
+            window.location.href = url.toString();
+        });
+    });
+</script> 

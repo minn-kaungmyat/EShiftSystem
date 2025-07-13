@@ -66,10 +66,15 @@ namespace EShiftSystem.Data
                .HasForeignKey(p => p.LoadId)
                .OnDelete(DeleteBehavior.Cascade);
 
+            // Configure LoadItem WeightKg decimal precision
+            modelBuilder.Entity<LoadItem>()
+                .Property(li => li.WeightKg)
+                .HasColumnType("decimal(10,2)"); // Max 99,999,999.99 kg
+
             // One Load has one TransportUnit
             modelBuilder.Entity<Load>()
                 .HasOne(l => l.TransportUnit)
-                .WithMany()
+                .WithMany(t => t.Loads)
                 .HasForeignKey(l => l.TransportUnitId)
                 .OnDelete(DeleteBehavior.Restrict);
 

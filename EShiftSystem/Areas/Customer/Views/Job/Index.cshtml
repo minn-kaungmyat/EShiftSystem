@@ -1,4 +1,4 @@
-﻿@model IEnumerable<EShiftSystem.Models.Job>
+﻿@model EShiftSystem.Helpers.PaginatedList<EShiftSystem.Models.Job>
 @using EShiftSystem.Models.Enums
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -15,7 +15,6 @@
     {
         JobStatus.Pending => "warning",
         JobStatus.Approved => "info",
-        JobStatus.Rejected => "danger",
         JobStatus.InProgress => "primary",
         JobStatus.Delivered => "light-success",
         JobStatus.Completed => "success",
@@ -59,7 +58,6 @@
                     <option value="">All</option>
                     <option value="Pending">Pending</option>
                     <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
                     <option value="InProgress">In Progress</option>
                     <option value="Delivered">Delivered</option>
                     <option value="Completed">Completed</option>
@@ -129,6 +127,67 @@
     </tbody>
 </table>
 
+<!-- Pagination -->
+<nav aria-label="Page navigation" class="d-flex justify-content-end mt-4">
+    <ul class="pagination mb-0">
+        <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+            <a class="page-link" asp-action="Index"
+               asp-route-pageNumber="@(Model.PageIndex - 1)"
+               asp-route-currentFilter="@ViewData["CurrentFilter"]">Previous</a>
+        </li>
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                <a class="page-link" asp-action="Index"
+                   asp-route-pageNumber="@i"
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]">@i</a>
+            </li>
+        }
+
+        <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+            <a class="page-link" asp-action="Index"
+               asp-route-pageNumber="@(Model.PageIndex + 1)"
+               asp-route-currentFilter="@ViewData["CurrentFilter"]">Next</a>
+        </li>
+    </ul>
+</nav>
+
+<style>
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-link {
+    color: var(--bs-primary);
+    background-color: var(--bs-white);
+    border: 1px solid #dee2e6;
+}
+
+.page-item.active .page-link {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: var(--bs-white);
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: var(--bs-white);
+    border-color: #dee2e6;
+}
+
+.page-link:hover {
+    color: var(--bs-primary);
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.page-item.active .page-link:hover {
+    color: var(--bs-white);
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
@@ -147,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const rows = Array.from(tbody.querySelectorAll('tr'));
         
         const priorityOrder = { 'Normal': 1, 'High': 2, 'Urgent': 3 };
-        const statusOrder = { 'Pending': 1, 'Approved': 2, 'Rejected': 3, 'InProgress': 4, 'Delivered': 5, 'Completed': 6, 'Cancelled': 7 };
+        const statusOrder = { 'Pending': 1, 'Approved': 2, 'InProgress': 4, 'Delivered': 5, 'Completed': 6, 'Cancelled': 7 };
         
         rows.sort((a, b) => {
             let aValue, bValue;

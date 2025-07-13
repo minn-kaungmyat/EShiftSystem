@@ -2,6 +2,7 @@ using EShiftSystem.Data;
 using EShiftSystem.Models;
 using EShiftSystem.Models.Enums;
 using EShiftSystem.ViewModels;
+using EShiftSystem.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -9,37 +10,44 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShiftSystem.Areas.Admin.Controllers
 {
+    // admin job controller for managing job approval, transport assignment and status updates
     [Authorize(Roles = "Admin")]
     [Area("Admin")]
     public class JobController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private const int PageSize = 10;
 
+        // initializes job controller with database context
         public JobController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        // displays list of all jobs with customer and transport information
+        public async Task<IActionResult> Index(int? pageNumber)
         {
             try
             {
-                var jobs = await _context.Jobs
+                var jobsQuery = _context.Jobs
                     .Include(j => j.Customer)
                     .Include(j => j.Loads)
                         .ThenInclude(l => l.TransportUnit)
-                    .OrderByDescending(j => j.CreatedAt)
-                    .ToListAsync();
+                    .OrderByDescending(j => j.CreatedAt);
+
+                var pageIndex = pageNumber ?? 1;
+                var jobs = await PaginatedList<Job>.CreateAsync(jobsQuery, pageIndex, PageSize);
 
                 return View(jobs);
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "An error occurred while loading jobs: " + ex.Message;
-                return View(new List<Job>());
+                return View(new PaginatedList<Job>(new List<Job>(), 0, 1, PageSize));
             }
         }
 
+        // displays detailed job information with transport assignment options
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -108,10 +116,17 @@ namespace EShiftSystem.Areas.Admin.Controllers
                     return RedirectToAction(nameof(Details), new { id = jobId });
                 }
 
-                // Check if job is approved or in progress before allowing transport unit assignment
-                if (load.Job.Status != JobStatus.Approved && load.Job.Status != JobStatus.InProgress)
+                // Check if job is approved before allowing transport unit assignment
+                if (load.Job.Status != JobStatus.Approved)
                 {
                     TempData["ErrorMessage"] = $"Transport units can only be assigned to approved jobs. Current job status: {load.Job.Status}";
+                    return RedirectToAction(nameof(Details), new { id = jobId });
+                }
+
+                // Prevent changes to transport unit assignment for loads already in progress
+                if (load.Status == JobStatus.InProgress)
+                {
+                    TempData["ErrorMessage"] = "Cannot change transport unit assignment - load is already in progress.";
                     return RedirectToAction(nameof(Details), new { id = jobId });
                 }
 
@@ -282,34 +297,52 @@ namespace EShiftSystem.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RejectJob(int jobId, string rejectionReason = "")
+        public async Task<IActionResult> CancelJob(int jobId, string cancellationReason = "")
         {
             try
             {
-                var job = await _context.Jobs.FindAsync(jobId);
+                var job = await _context.Jobs
+                    .Include(j => j.Loads)
+                        .ThenInclude(l => l.TransportUnit)
+                    .FirstOrDefaultAsync(j => j.JobId == jobId);
+                    
                 if (job == null)
                 {
                     TempData["ErrorMessage"] = "Job not found.";
                     return RedirectToAction(nameof(Index));
                 }
 
-                if (job.Status != JobStatus.Pending)
+                if (job.Status == JobStatus.Completed || job.Status == JobStatus.Cancelled)
                 {
-                    TempData["ErrorMessage"] = "Only pending jobs can be rejected.";
+                    TempData["ErrorMessage"] = "Completed or already cancelled jobs cannot be cancelled.";
                     return RedirectToAction(nameof(Details), new { id = jobId });
                 }
 
-                job.Status = JobStatus.Rejected;
+                job.Status = JobStatus.Cancelled;
                 job.UpdatedAt = DateTime.Now;
+                
+                // Update all loads to cancelled and release transport units
+                foreach (var load in job.Loads)
+                {
+                    load.Status = JobStatus.Cancelled;
+                    
+                    // Release transport unit if assigned
+                    if (load.TransportUnit != null)
+                    {
+                        load.TransportUnit.Status = TransportUnitStatus.Available;
+                        load.TransportUnitId = null;
+                    }
+                }
+                
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = string.IsNullOrEmpty(rejectionReason) 
-                    ? "Job has been rejected." 
-                    : $"Job has been rejected. Reason: {rejectionReason}";
+                TempData["SuccessMessage"] = string.IsNullOrEmpty(cancellationReason) 
+                    ? "Job has been cancelled." 
+                    : $"Job has been cancelled. Reason: {cancellationReason}";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "An error occurred while rejecting the job: " + ex.Message;
+                TempData["ErrorMessage"] = "An error occurred while cancelling the job: " + ex.Message;
             }
 
             return RedirectToAction(nameof(Details), new { id = jobId });

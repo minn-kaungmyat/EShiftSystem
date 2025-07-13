@@ -6,17 +6,20 @@ using EShiftSystem.Models.Enums;
 
 namespace EShiftSystem.Areas.Admin.Controllers
 {
+    // admin dashboard controller providing system overview and statistics
     [Area("Admin")]
     [Authorize(Roles = "Admin")]
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
 
+        // initializes dashboard controller with database context
         public DashboardController(ApplicationDbContext context)
         {
             _context = context;
         }
 
+        // displays comprehensive dashboard with system statistics and recent activity
         public async Task<IActionResult> Index()
         {
             // Get current date for comparisons
@@ -24,17 +27,19 @@ namespace EShiftSystem.Areas.Admin.Controllers
             var startOfWeek = today.AddDays(-(int)today.DayOfWeek);
             var startOfMonth = new DateTime(today.Year, today.Month, 1);
 
-            // Job statistics
+            // collect job statistics by status and timeframe
             var totalJobs = await _context.Jobs.CountAsync();
             var pendingJobs = await _context.Jobs.CountAsync(j => j.Status == JobStatus.Pending);
             var approvedJobs = await _context.Jobs.CountAsync(j => j.Status == JobStatus.Approved);
             var inProgressJobs = await _context.Jobs.CountAsync(j => j.Status == JobStatus.InProgress);
             var completedJobs = await _context.Jobs.CountAsync(j => j.Status == JobStatus.Completed);
+            var deliveredJobs = await _context.Jobs.CountAsync(j => j.Status == JobStatus.Delivered);
+            var cancelledJobs = await _context.Jobs.CountAsync(j => j.Status == JobStatus.Cancelled);
             var todayJobs = await _context.Jobs.CountAsync(j => j.CreatedAt.Date == today);
             var weekJobs = await _context.Jobs.CountAsync(j => j.CreatedAt.Date >= startOfWeek);
             var monthJobs = await _context.Jobs.CountAsync(j => j.CreatedAt.Date >= startOfMonth);
 
-            // Customer statistics
+            // collect customer account statistics
             var totalCustomers = await _context.Customers.CountAsync();
             var activeCustomers = await _context.Customers.CountAsync(c => c.IsActive);
             var inactiveCustomers = totalCustomers - activeCustomers;
@@ -63,6 +68,23 @@ namespace EShiftSystem.Areas.Admin.Controllers
             var highPriorityJobs = await _context.Jobs.CountAsync(j => j.Priority == JobPriority.High && j.Status != JobStatus.Completed && j.Status != JobStatus.Cancelled);
             var normalPriorityJobs = await _context.Jobs.CountAsync(j => j.Priority == JobPriority.Normal && j.Status != JobStatus.Completed && j.Status != JobStatus.Cancelled);
 
+            // Monthly trends data (last 6 months)
+            var monthlyJobsData = new List<object>();
+            for (int i = 5; i >= 0; i--)
+            {
+                var month = today.AddMonths(-i);
+                var startOfMonthPeriod = new DateTime(month.Year, month.Month, 1);
+                var endOfMonthPeriod = startOfMonthPeriod.AddMonths(1).AddDays(-1);
+                
+                var jobsCount = await _context.Jobs.CountAsync(j => 
+                    j.CreatedAt.Date >= startOfMonthPeriod && j.CreatedAt.Date <= endOfMonthPeriod);
+                
+                monthlyJobsData.Add(new {
+                    Month = month.ToString("MMM yyyy"),
+                    Count = jobsCount
+                });
+            }
+
             // Create view model
             var viewModel = new
             {
@@ -71,7 +93,9 @@ namespace EShiftSystem.Areas.Admin.Controllers
                 PendingJobs = pendingJobs,
                 ApprovedJobs = approvedJobs,
                 InProgressJobs = inProgressJobs,
+                DeliveredJobs = deliveredJobs,
                 CompletedJobs = completedJobs,
+                CancelledJobs = cancelledJobs,
                 TodayJobs = todayJobs,
                 WeekJobs = weekJobs,
                 MonthJobs = monthJobs,
@@ -96,6 +120,9 @@ namespace EShiftSystem.Areas.Admin.Controllers
                 UrgentJobs = urgentJobs,
                 HighPriorityJobs = highPriorityJobs,
                 NormalPriorityJobs = normalPriorityJobs,
+
+                // Chart Data
+                MonthlyJobsData = monthlyJobsData,
 
                 // Recent Activity
                 RecentJobs = recentJobs

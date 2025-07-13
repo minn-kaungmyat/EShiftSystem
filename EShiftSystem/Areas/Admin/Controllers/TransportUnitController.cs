@@ -80,6 +80,12 @@ namespace EShiftSystem.Areas.Admin.Controllers
         {
             try
             {
+                // Additional server-side validation for assistant limits
+                if (model.SelectedAssistantIds != null && model.SelectedAssistantIds.Count > 4)
+                {
+                    ModelState.AddModelError("SelectedAssistantIds", "A transport unit can have a maximum of 4 assistants.");
+                }
+
                 if (ModelState.IsValid)
                 {
                     _context.TransportUnits.Add(model.TransportUnit);
@@ -99,10 +105,25 @@ namespace EShiftSystem.Areas.Admin.Controllers
                 }
 
                 // Reload dropdowns on error
-                ViewData["LorryId"] = new SelectList(_context.Lorries, "LorryId", "LicensePlate");
-                ViewData["DriverId"] = new SelectList(_context.Drivers, "DriverId", "Name");
-                ViewData["ContainerId"] = new SelectList(_context.Containers, "ContainerId", "Type");
-                ViewData["AssistantIds"] = new MultiSelectList(_context.Assistants, "AssistantId", "Name");
+                var availableLorries = _context.Lorries
+                    .Where(l => !_context.TransportUnits.Any(t => t.LorryId == l.LorryId))
+                    .ToList();
+                ViewData["LorryId"] = new SelectList(availableLorries, "LorryId", "LicensePlate");
+
+                var availableDrivers = _context.Drivers
+                    .Where(d => !_context.TransportUnits.Any(t => t.DriverId == d.DriverId))
+                    .ToList();
+                ViewData["DriverId"] = new SelectList(availableDrivers, "DriverId", "Name");
+
+                var availableContainers = _context.Containers
+                    .Where(c => !_context.TransportUnits.Any(t => t.ContainerId == c.ContainerId))
+                    .ToList();
+                ViewData["ContainerId"] = new SelectList(availableContainers, "ContainerId", "Type");
+
+                var availableAssistants = _context.Assistants
+                    .Where(a => a.TransportUnitId == null)
+                    .ToList();
+                ViewData["AssistantIds"] = new MultiSelectList(availableAssistants, "AssistantId", "Name", model.SelectedAssistantIds);
 
                 return View(model);
             }
@@ -165,6 +186,12 @@ namespace EShiftSystem.Areas.Admin.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
+                // Additional server-side validation for assistant limits
+                if (model.SelectedAssistantIds != null && model.SelectedAssistantIds.Count > 4)
+                {
+                    ModelState.AddModelError("SelectedAssistantIds", "A transport unit can have a maximum of 4 assistants.");
+                }
+
                 if (ModelState.IsValid)
                 {
                     try
@@ -205,7 +232,12 @@ namespace EShiftSystem.Areas.Admin.Controllers
                 ViewData["LorryId"] = new SelectList(_context.Lorries, "LorryId", "LicensePlate", model.TransportUnit.LorryId);
                 ViewData["DriverId"] = new SelectList(_context.Drivers, "DriverId", "Name", model.TransportUnit.DriverId);
                 ViewData["ContainerId"] = new SelectList(_context.Containers, "ContainerId", "Type", model.TransportUnit.ContainerId);
-                ViewData["AssistantIds"] = new MultiSelectList(_context.Assistants, "AssistantId", "Name", model.SelectedAssistantIds);
+                
+                // For edit, show available assistants plus currently assigned ones
+                var availableAssistants = _context.Assistants
+                    .Where(a => a.TransportUnitId == null || a.TransportUnitId == id)
+                    .ToList();
+                ViewData["AssistantIds"] = new MultiSelectList(availableAssistants, "AssistantId", "Name", model.SelectedAssistantIds);
 
                 return View(model);
             }

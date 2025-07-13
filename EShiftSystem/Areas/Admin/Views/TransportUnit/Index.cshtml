@@ -40,7 +40,10 @@
                 <td>@string.Join(", ", unit.Assistants.Select(a => a.Name))</td>
                 <td>
                     <a class="btn btn-sm btn-outline" asp-action="Edit" asp-route-id="@unit.TransportUnitId"><i class="fas fa-edit"></i> Edit</a>
-                    <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@unit.TransportUnitId"><i class="fas fa-trash-alt"></i> Delete</a>
+                    @if (unit.Status == EShiftSystem.Models.Enums.TransportUnitStatus.Available)
+                    {
+                        <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@unit.TransportUnitId"><i class="fas fa-trash-alt"></i> Delete</a>
+                    }
                 </td>
             </tr>
         }

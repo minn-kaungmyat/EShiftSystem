@@ -15,7 +15,6 @@
     {
         JobStatus.Pending => "warning",
         JobStatus.Approved => "info",
-        JobStatus.Rejected => "danger",
         JobStatus.InProgress => "primary",
         JobStatus.Delivered => "light-success",
         JobStatus.Completed => "success",
@@ -86,6 +85,37 @@
             <div class="stat-number">@Model.TotalLorries</div>
             <div class="stat-label">Total Lorries</div>
             <div class="stat-detail">@Model.TotalContainers containers</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="dashboard-charts">
+    <div class="charts-grid">
+        <!-- Job Status Distribution Chart -->
+        <div class="dashboard-panel chart-panel">
+            <div class="panel-header">
+                <h3><i class="fas fa-chart-pie"></i> Job Status Distribution</h3>
+                <small>Current breakdown of all jobs by status</small>
+            </div>
+            <div class="panel-content">
+                <div class="chart-container">
+                    <canvas id="jobStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Job Trends Chart -->
+        <div class="dashboard-panel chart-panel">
+            <div class="panel-header">
+                <h3><i class="fas fa-chart-line"></i> Monthly Job Trends</h3>
+                <small>Job creation trends over the last 6 months</small>
+            </div>
+            <div class="panel-content">
+                <div class="chart-container">
+                    <canvas id="monthlyTrendsChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -217,3 +247,124 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Chart.js configuration
+        Chart.defaults.font.family = "'Poppins', sans-serif";
+        Chart.defaults.color = '#333333';
+
+        // Job Status Distribution Chart
+        const jobStatusCtx = document.getElementById('jobStatusChart').getContext('2d');
+        const jobStatusChart = new Chart(jobStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'Approved', 'In Progress', 'Delivered', 'Completed', 'Cancelled'],
+                datasets: [{
+                    data: [@Model.PendingJobs, @Model.ApprovedJobs, @Model.InProgressJobs, @Model.DeliveredJobs, @Model.CompletedJobs, @Model.CancelledJobs],
+                    backgroundColor: [
+                        '#ffc107', // Pending - warning yellow
+                        '#17a2b8', // Approved - info blue
+                        '#004080', // In Progress - primary blue
+                        '#28a745', // Delivered - success green
+                        '#20c997', // Completed - teal
+                        '#6c757d'  // Cancelled - secondary gray
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '50%'
+            }
+        });
+
+        // Monthly Job Trends Chart
+        const monthlyTrendsCtx = document.getElementById('monthlyTrendsChart').getContext('2d');
+        const monthlyData = @Html.Raw(Json.Serialize(Model.MonthlyJobsData));
+        
+        const monthlyTrendsChart = new Chart(monthlyTrendsCtx, {
+            type: 'line',
+            data: {
+                labels: monthlyData.map(item => item.month),
+                datasets: [{
+                    label: 'Jobs Created',
+                    data: monthlyData.map(item => item.count),
+                    borderColor: '#004080',
+                    backgroundColor: 'rgba(0, 64, 128, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#004080',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            font: {
+                                size: 12
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: 12
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    </script>
+}

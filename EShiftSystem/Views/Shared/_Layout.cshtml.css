@@ -61,17 +61,17 @@ button.accept-policy {
 }
 
 .sidebar {
-    /*    margin: 20px 0 20px 20px;*/
+        margin: 20px 0 20px 20px;
     width: 240px;
     background-color: white;
-    /*    border-radius: 8px;*/
+        border-radius: 8px;
     padding: 20px;
     /*    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);*/
-    min-height: calc(100vh - 64px);
+/*    min-height: calc(100vh - 64px);*/
     border-right: 1px solid var(--light-gray);
-    /*    height: calc(100vh - 104px);*/
-    /*position: sticky;
-    top: 84px;*/
+        height: calc(100vh - 104px);
+    position: sticky;
+    top: 84px;
 }
 .sidebar-menu {
     list-style-type: none;

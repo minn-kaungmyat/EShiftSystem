@@ -8,6 +8,7 @@ using EShiftSystem.Models.Enums;
 
 namespace EShiftSystem.Areas.Customer.Controllers
 {
+    // customer dashboard controller showing personal job statistics and activity
     [Authorize(Roles = "Customer")]
     [Area("Customer")]
     public class DashboardController : Controller
@@ -15,12 +16,14 @@ namespace EShiftSystem.Areas.Customer.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
 
+        // initializes dashboard with database context and user manager
         public DashboardController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
 
+        // displays customer's personal dashboard with job statistics and recent activity
         public async Task<IActionResult> Index()
         {
             // Get current customer
@@ -33,11 +36,11 @@ namespace EShiftSystem.Areas.Customer.Controllers
                 return RedirectToAction("Login", "Account", new { area = "Identity" });
             }
 
-            // Customer's job statistics - simplified
+            // calculate customer's job statistics for dashboard display
             var customerJobs = _context.Jobs.Where(j => j.CustomerId == customer.CustomerId);
             
             var totalJobs = await customerJobs.CountAsync();
-            var activeJobs = await customerJobs.CountAsync(j => j.Status != JobStatus.Completed && j.Status != JobStatus.Cancelled && j.Status != JobStatus.Rejected);
+            var activeJobs = await customerJobs.CountAsync(j => j.Status != JobStatus.Completed && j.Status != JobStatus.Cancelled);
             var completedJobs = await customerJobs.CountAsync(j => j.Status == JobStatus.Completed);
             
             // Jobs requiring customer action (delivered but not completed)
@@ -54,8 +57,7 @@ namespace EShiftSystem.Areas.Customer.Controllers
             var urgentActiveJobs = await customerJobs
                 .CountAsync(j => j.Priority == JobPriority.Urgent && 
                            j.Status != JobStatus.Completed && 
-                           j.Status != JobStatus.Cancelled && 
-                           j.Status != JobStatus.Rejected);
+                           j.Status != JobStatus.Cancelled);
 
             // Create simplified view model
             var viewModel = new

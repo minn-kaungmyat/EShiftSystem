@@ -1,0 +1,128 @@
+@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Revenue Report";
+}
+
+<div class="container-fluid">
+    <h2>Revenue Report</h2>
+
+    <partial name="_DateFilter" />
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Revenue</h5>
+                    <p class="card-text display-6">@ViewBag.TotalRevenue.ToString("C")</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Jobs</h5>
+                    <p class="card-text display-6">@ViewBag.TotalJobs</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Completed Jobs</h5>
+                    <p class="card-text display-6">@ViewBag.CompletedJobs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Revenue</th>
+                            <th>Jobs</th>
+                            <th>Completed Jobs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Date.ToString("d")</td>
+                                <td>@item.Revenue.ToString("C")</td>
+                                <td>@item.JobCount</td>
+                                <td>@item.CompletedJobCount</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            const data = {
+                labels: [@Html.Raw(string.Join(",", Model.Select(x => $"'{x.Date.ToString("d")}'")))],
+                datasets: [{
+                    label: 'Daily Revenue',
+                    data: [@string.Join(",", Model.Select(x => x.Revenue))],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    type: 'bar'
+                }, {
+                    label: 'Jobs Count',
+                    data: [@string.Join(",", Model.Select(x => x.JobCount))],
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    type: 'line',
+                    yAxisID: 'jobCount'
+                }]
+            };
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Revenue'
+                            }
+                        },
+                        jobCount: {
+                            beginAtZero: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Number of Jobs'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+} 

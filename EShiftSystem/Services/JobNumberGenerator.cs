@@ -3,20 +3,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShiftSystem.Services
 {
+    // interface for generating unique job numbers
     public interface IJobNumberGenerator
     {
         Task<string> GenerateJobNumberAsync();
     }
 
+    // service for generating unique job numbers in format JOB-YYYY-MM-XXXX
     public class JobNumberGenerator : IJobNumberGenerator
     {
         private readonly ApplicationDbContext _context;
 
+        // initializes generator with database context
         public JobNumberGenerator(ApplicationDbContext context)
         {
             _context = context;
         }
 
+        // generates unique job number based on current year, month and sequential count
         public async Task<string> GenerateJobNumberAsync()
         {
             var currentYear = DateTime.Now.Year;
