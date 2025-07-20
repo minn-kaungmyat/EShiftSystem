@@ -1,5 +1,4 @@
 # EShiftSystem
-# EShiftSystem
 
 This project is a web application built with ASP.NET Core and uses Entity Framework Core for database operations with SQL Server.
 
