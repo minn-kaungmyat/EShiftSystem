@@ -41,7 +41,7 @@ namespace EShiftSystem.Data
                     EmailConfirmed = true,
                 };
 
-                    var result = await userManager.CreateAsync(user, "Admin@123"); // Must meet Identity password requirements
+                    var result = await userManager.CreateAsync(user, "Admin@123"); 
 
                 if (result.Succeeded)
                 {

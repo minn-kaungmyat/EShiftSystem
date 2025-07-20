@@ -15,5 +15,8 @@ namespace EShiftSystem.Models
         // vehicle model information
         [MaxLength(50)]
         public string? Model { get; set; }
+
+        // indicates if the lorry is currently assigned to a transport unit
+        public bool IsAssigned { get; set; } = false;
     }
 }

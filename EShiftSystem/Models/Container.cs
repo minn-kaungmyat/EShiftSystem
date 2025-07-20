@@ -15,5 +15,8 @@ namespace EShiftSystem.Models
         // type/category of the container
         [MaxLength(50)]
         public string? Type { get; set; }
+
+        // indicates if the container is currently assigned to a transport unit
+        public bool IsAssigned { get; set; } = false;
     }
 }

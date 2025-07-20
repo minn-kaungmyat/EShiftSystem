@@ -21,6 +21,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using EShiftSystem.Data; 
 using EShiftSystem.Models;
+using EShiftSystem.Services;
 
 namespace EShiftSystem.Areas.Identity.Pages.Account
 {
@@ -158,7 +159,7 @@ namespace EShiftSystem.Areas.Identity.Pages.Account
                         FullName =Input.FullName,
                         Address = Input.Address,
                         Phone = Input.Phone,
-                      
+                        IsActive = true // Ensure new customers are active by default
                     };
 
                     _dbContext.Customers.Add(customer);
@@ -174,8 +175,8 @@ namespace EShiftSystem.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    //var emailBody = EmailTemplates.GetEmailConfirmationTemplate(Input.FullName, callbackUrl);
+                    //await _emailSender.SendEmailAsync(Input.Email, "Welcome to EShift - Confirm Your Email", emailBody);
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

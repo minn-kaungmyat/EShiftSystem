@@ -49,6 +49,7 @@ namespace EShiftSystem.Areas.Customer.Controllers
                 Email = currentUser.Email ?? ""
             };
 
+            ViewBag.ActiveTab = TempData["ActiveTab"] ?? "profile"; // Use TempData if available, otherwise default to profile tab
             return View(viewModel);
         }
 
@@ -57,8 +58,30 @@ namespace EShiftSystem.Areas.Customer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(ProfileViewModel model)
         {
+            // Check if user wants to change password
+            bool isPasswordChange = !string.IsNullOrEmpty(model.CurrentPassword) || !string.IsNullOrEmpty(model.NewPassword);
+            
+            if (isPasswordChange)
+            {
+                // Validate password fields
+                if (string.IsNullOrEmpty(model.CurrentPassword))
+                {
+                    ModelState.AddModelError("CurrentPassword", "Current password is required to change password.");
+                }
+                if (string.IsNullOrEmpty(model.NewPassword))
+                {
+                    ModelState.AddModelError("NewPassword", "New password is required.");
+                }
+                if (model.NewPassword != model.ConfirmPassword)
+                {
+                    ModelState.AddModelError("ConfirmPassword", "New password and confirmation password do not match.");
+                }
+            }
+
             if (!ModelState.IsValid)
             {
+                // Set active tab based on validation errors
+                ViewBag.ActiveTab = isPasswordChange ? "password" : "profile";
                 return View(model);
             }
 
@@ -89,12 +112,37 @@ namespace EShiftSystem.Areas.Customer.Controllers
                 _context.Customers.Update(customer);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "Profile updated successfully!";
+                var successMessage = "Profile updated successfully!";
+
+                // Handle password change if requested
+                if (isPasswordChange && !string.IsNullOrEmpty(model.CurrentPassword) && !string.IsNullOrEmpty(model.NewPassword))
+                {
+                    var changePasswordResult = await _userManager.ChangePasswordAsync(currentUser, model.CurrentPassword, model.NewPassword);
+                    if (changePasswordResult.Succeeded)
+                    {
+                        successMessage = "Profile and password updated successfully!";
+                    }
+                    else
+                    {
+                        // Add password change errors to ModelState
+                        foreach (var error in changePasswordResult.Errors)
+                        {
+                            ModelState.AddModelError("CurrentPassword", error.Description);
+                        }
+                        ViewBag.ActiveTab = "password";
+                        return View(model);
+                    }
+                }
+
+                TempData["SuccessMessage"] = successMessage;
+                // Set active tab based on the operation performed
+                TempData["ActiveTab"] = isPasswordChange ? "password" : "profile";
                 return RedirectToAction("Index");
             }
             catch (Exception)
             {
                 TempData["ErrorMessage"] = "An error occurred while updating your profile. Please try again.";
+                ViewBag.ActiveTab = isPasswordChange ? "password" : "profile";
                 return View(model);
             }
         }
@@ -123,5 +171,20 @@ namespace EShiftSystem.Areas.Customer.Controllers
 
         [Display(Name = "Email Address")]
         public string Email { get; set; } = string.Empty;
+
+        // Password change fields
+        [Display(Name = "Current Password")]
+        [DataType(DataType.Password)]
+        public string? CurrentPassword { get; set; }
+
+        [Display(Name = "New Password")]
+        [DataType(DataType.Password)]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        public string? NewPassword { get; set; }
+
+        [Display(Name = "Confirm New Password")]
+        [DataType(DataType.Password)]
+        [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
+        public string? ConfirmPassword { get; set; }
     }
 } 

@@ -8,7 +8,44 @@
     <h2>My Profile</h2>
 </div>
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@{
+    bool isPasswordTabActive = ViewBag.ActiveTab?.ToString() == "password";
+}
+
+<!-- Tab Navigation -->
+<ul class="nav nav-tabs" id="profileTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link @(isPasswordTabActive ? "" : "active")" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-content" type="button" role="tab" aria-controls="profile-content" aria-selected="@(!isPasswordTabActive ? "true" : "false")">
+            <i class="fas fa-user me-2"></i>Profile Information
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link @(isPasswordTabActive ? "active" : "")" id="password-tab" data-bs-toggle="tab" data-bs-target="#password-content" type="button" role="tab" aria-controls="password-content" aria-selected="@(isPasswordTabActive ? "true" : "false")">
+            <i class="fas fa-key me-2"></i>Change Password
+        </button>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="profileTabsContent">
+    <!-- Profile Information Tab -->
+    <div class="tab-pane fade @(isPasswordTabActive ? "" : "show active")" id="profile-content" role="tabpanel" aria-labelledby="profile-tab">
         <form asp-action="Index" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
             <input type="hidden" asp-for="CustomerId" />
@@ -45,11 +82,59 @@
             
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
-                   Save
+                   Save Profile
                 </button>
-              
             </div>
         </form>
+    </div>
+
+    <!-- Password Change Tab -->
+    <div class="tab-pane fade @(isPasswordTabActive ? "show active" : "")" id="password-content" role="tabpanel" aria-labelledby="password-tab">
+        <form asp-action="Index" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="CustomerId" />
+            
+            <!-- Include profile fields as hidden to maintain them -->
+            <input type="hidden" asp-for="FullName" />
+            <input type="hidden" asp-for="Phone" />
+            <input type="hidden" asp-for="Address" />
+            <input type="hidden" asp-for="Email" />
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="CurrentPassword" class="control-label"></label>
+                        <input asp-for="CurrentPassword" class="form-control" />
+                        <span asp-validation-for="CurrentPassword" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="NewPassword" class="control-label"></label>
+                        <input asp-for="NewPassword" class="form-control" />
+                        <span asp-validation-for="NewPassword" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="ConfirmPassword" class="control-label"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                   Change Password
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
@@ -64,6 +149,42 @@
         padding-top: 1rem;
     }
     
+    .nav-tabs {
+        border-bottom: 2px solid #dee2e6;
+        margin-bottom: 2rem;
+    }
+    
+    .nav-tabs .nav-link {
+        color: #495057;
+        font-weight: 500;
+        border: none;
+        border-radius: 0;
+        padding: 1rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        color: #007bff;
+        background-color: #f8f9fa;
+        border-color: transparent;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #007bff;
+        background-color: transparent;
+        border-color: transparent;
+        border-bottom: 2px solid #007bff;
+        font-weight: 600;
+    }
+    
+    .tab-content {
+        padding-top: 1rem;
+    }
+    
+    .tab-pane {
+        min-height: 400px;
+    }
+    
     @@media (max-width: 768px) {
         .form-actions {
             flex-direction: column;
@@ -73,6 +194,11 @@
         .form-actions .btn {
             width: 100%;
             margin-bottom: 0.5rem;
+        }
+        
+        .nav-tabs .nav-link {
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
         }
     }
 </style> 

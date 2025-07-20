@@ -12,11 +12,12 @@ namespace EShiftSystem.ViewModels
 
         // collection of assistant ids selected for this transport unit
         [Display(Name = "Assistants")]
-        public List<int> SelectedAssistantIds { get; set; } = new List<int>();
+        public List<int>? SelectedAssistantIds { get; set; } = new List<int>();
 
         // Custom validation method to enforce assistant limits
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationsContext)
         {
+            // Assistants are optional, so no validation needed for empty selection
             if (SelectedAssistantIds != null && SelectedAssistantIds.Count > 4)
             {
                 yield return new ValidationResult(

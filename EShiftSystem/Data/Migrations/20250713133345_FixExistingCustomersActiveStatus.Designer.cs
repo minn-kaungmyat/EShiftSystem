@@ -4,6 +4,7 @@ using EShiftSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EShiftSystem.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250713133345_FixExistingCustomersActiveStatus")]
+    partial class FixExistingCustomersActiveStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,9 +117,6 @@ namespace EShiftSystem.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AssistantId"));
 
-                    b.Property<bool>("IsAssigned")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -139,9 +139,6 @@ namespace EShiftSystem.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ContainerId"));
-
-                    b.Property<bool>("IsAssigned")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Size")
                         .HasMaxLength(50)
@@ -197,9 +194,6 @@ namespace EShiftSystem.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DriverId"));
-
-                    b.Property<bool>("IsAssigned")
-                        .HasColumnType("bit");
 
                     b.Property<string>("License")
                         .IsRequired()
@@ -367,9 +361,6 @@ namespace EShiftSystem.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LorryId"));
-
-                    b.Property<bool>("IsAssigned")
-                        .HasColumnType("bit");
 
                     b.Property<string>("LicensePlate")
                         .IsRequired()

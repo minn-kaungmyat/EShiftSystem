@@ -197,7 +197,7 @@
                                                     <h6 class="mb-0">Transport Unit Assignment</h6>
                                                 </div>
                                                 <div class="card-body">
-                                                    @if (Model.Status == JobStatus.Approved && load.Status != JobStatus.InProgress)
+                                                    @if (Model.Status != JobStatus.Pending && load.Status == JobStatus.Pending)
                                                     {
                                                         <form asp-action="AssignTransportUnit" method="post" class="mb-3">
                                                             <input type="hidden" name="jobId" value="@Model.JobId" />
@@ -218,25 +218,33 @@
                                                             </div>
                                                         </form>
                                                     }
-                                                    else if (load.Status == JobStatus.InProgress)
-                                                    {
-                                                        <div class="alert alert-info">
-                                                            <i class="fas fa-lock me-2"></i>
-                                                            Transport unit assignment is locked - load is currently in progress.
-                                                        </div>
-                                                    }
-                                                    else if (Model.Status != JobStatus.Approved)
+                                                    else if (Model.Status == JobStatus.Pending)
                                                     {
                                                         <div class="alert alert-warning">
                                                             <i class="fas fa-exclamation-triangle me-2"></i>
-                                                            Transport units can only be assigned to approved jobs.
-                                                            @if (Model.Status == JobStatus.Pending)
+                                                            Transport units can only be assigned after the job is approved. Please approve the job first.
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="alert alert-info">
+                                                            <i class="fas fa-lock me-2"></i>
+                                                            Transport unit assignment is locked - load status is @load.Status.
+                                                            @if (load.Status == JobStatus.InProgress)
                                                             {
-                                                                <span>Please approve this job first.</span>
+                                                                <span>Load is currently in progress.</span>
                                                             }
-                                                            else
+                                                            else if (load.Status == JobStatus.Delivered)
                                                             {
-                                                                <span>Job status: @Model.Status</span>
+                                                                <span>Load has been delivered.</span>
+                                                            }
+                                                            else if (load.Status == JobStatus.Completed)
+                                                            {
+                                                                <span>Load has been completed.</span>
+                                                            }
+                                                            else if (load.Status == JobStatus.Cancelled)
+                                                            {
+                                                                <span>Load has been cancelled.</span>
                                                             }
                                                         </div>
                                                     }

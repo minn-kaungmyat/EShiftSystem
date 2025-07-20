@@ -16,6 +16,7 @@
         <tr>
             <th>Name</th>
             <th>License</th>
+            <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -26,12 +27,26 @@
                 <td>@item.Name</td>
                 <td>@item.License</td>
                 <td>
+                    @if (item.IsAssigned)
+                    {
+                        <span class="badge bg-warning">Assigned</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Available</span>
+                    }
+                </td>
+                <td>
                     <a class="btn btn-sm btn-outline me-2" asp-action="Edit" asp-route-id="@item.DriverId" title="Edit">
                         <i class="fas fa-edit"></i> Edit
                     </a>
-                    <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@item.DriverId" title="Delete">
-                        <i class="fas fa-trash-alt"></i> Delete
-                    </a>
+                    @if (!item.IsAssigned)
+                    {
+                        <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@item.DriverId" title="Delete">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </a>
+                    }
+                   
                 </td>
             </tr>
         }

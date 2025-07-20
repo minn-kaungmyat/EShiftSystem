@@ -14,6 +14,7 @@
         <tr>
             <th>Size</th>
             <th>Type</th>
+            <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -24,8 +25,26 @@
                 <td>@item.Size</td>
                 <td>@item.Type</td>
                 <td>
-                    <a class="btn btn-sm btn-outline me-2" asp-action="Edit" asp-route-id="@item.ContainerId"><i class="fas fa-edit"></i> Edit</a>
-                    <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@item.ContainerId"><i class="fas fa-trash-alt"></i> Delete</a>
+                    @if (item.IsAssigned)
+                    {
+                        <span class="badge bg-warning">Assigned</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Available</span>
+                    }
+                </td>
+                <td>
+                    <a class="btn btn-sm btn-outline me-2" asp-action="Edit" asp-route-id="@item.ContainerId" title="Edit">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    @if (!item.IsAssigned)
+                    {
+                        <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@item.ContainerId" title="Delete">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </a>
+                    }
+                    
                 </td>
             </tr>
         }

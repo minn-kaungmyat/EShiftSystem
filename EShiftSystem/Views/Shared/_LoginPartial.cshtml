@@ -2,11 +2,24 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
+@{
+    var user = UserManager.GetUserAsync(User).Result;
+    var roles = user != null ? UserManager.GetRolesAsync(user).Result : new List<string>();
+    bool isCustomer = roles.Contains("Customer");
+}
+
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
     <li style="display: flex; align-items: center">
-        <a style="margin-right: 15px" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">@User.Identity?.Name</a>
+        @if (isCustomer)
+        {
+            <a style="margin-right: 15px" asp-area="Customer" asp-controller="Profile" asp-action="Index" title="My Profile">@User.Identity?.Name</a>
+        }
+        else
+        {
+            <a style="margin-right: 15px" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">@User.Identity?.Name</a>
+        }
     </li>
     <li>
         <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">

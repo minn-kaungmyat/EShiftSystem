@@ -4,16 +4,15 @@
 }
 <div class="content-header">
     <h2>Assistants</h2>
-    <a class="btn btn-primary" asp-action="Create">
-        <i class="fas fa-plus"></i> Create New Assistant
-    </a>
+    <a class="btn btn-primary" asp-area="Admin" asp-controller="Assistant" asp-action="Create"><i class="fas fa-plus"></i> Create New Assistant</a>
 </div>
 
 <table>
     <thead>
         <tr>
             <th>Name</th>
-            <th>Assigned Unit</th>
+            <th>Transport Unit</th>
+            <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -22,10 +21,28 @@
         {
             <tr>
                 <td>@item.Name</td>
-                <td>@item.TransportUnit?.Name</td>
+                <td>@(item.TransportUnit?.Name ?? "Not Assigned")</td>
                 <td>
-                    <a class="btn btn-sm btn-outline me-2" asp-action="Edit" asp-route-id="@item.AssistantId"><i class="fas fa-edit"></i> Edit</a>
-                    <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@item.AssistantId"><i class="fas fa-trash-alt"></i> Delete</a>
+                    @if (item.IsAssigned)
+                    {
+                        <span class="badge bg-warning">Assigned</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Available</span>
+                    }
+                </td>
+                <td>
+                    <a class="btn btn-sm btn-outline me-2" asp-action="Edit" asp-route-id="@item.AssistantId" title="Edit">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    @if (!item.IsAssigned)
+                    {
+                        <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@item.AssistantId" title="Delete">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </a>
+                    }
+                   
                 </td>
             </tr>
         }

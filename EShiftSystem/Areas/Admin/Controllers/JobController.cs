@@ -116,17 +116,17 @@ namespace EShiftSystem.Areas.Admin.Controllers
                     return RedirectToAction(nameof(Details), new { id = jobId });
                 }
 
-                // Check if job is approved before allowing transport unit assignment
-                if (load.Job.Status != JobStatus.Approved)
+                // Check if job is approved (not pending) before allowing transport unit assignment
+                if (load.Job.Status == JobStatus.Pending)
                 {
-                    TempData["ErrorMessage"] = $"Transport units can only be assigned to approved jobs. Current job status: {load.Job.Status}";
+                    TempData["ErrorMessage"] = "Transport units can only be assigned after the job is approved. Please approve the job first.";
                     return RedirectToAction(nameof(Details), new { id = jobId });
                 }
 
-                // Prevent changes to transport unit assignment for loads already in progress
-                if (load.Status == JobStatus.InProgress)
+                // Only allow transport unit assignment to loads that are in Pending status
+                if (load.Status != JobStatus.Pending)
                 {
-                    TempData["ErrorMessage"] = "Cannot change transport unit assignment - load is already in progress.";
+                    TempData["ErrorMessage"] = $"Transport units can only be assigned to pending loads. Current load status: {load.Status}";
                     return RedirectToAction(nameof(Details), new { id = jobId });
                 }
 
@@ -164,30 +164,48 @@ namespace EShiftSystem.Areas.Admin.Controllers
                 {
                     load.Status = JobStatus.InProgress;
                     
-                    // Update job status to InProgress if at least one load has transport unit assigned
-                    var hasAnyAssignedLoad = await _context.Loads
-                        .Where(l => l.JobId == jobId)
-                        .AnyAsync(l => l.TransportUnitId.HasValue || l.LoadId == loadId);
-                    
-                    if (hasAnyAssignedLoad && load.Job.Status == JobStatus.Approved)
+                    // Update job status to InProgress if not already in progress or further
+                    if (load.Job.Status == JobStatus.Approved)
                     {
                         load.Job.Status = JobStatus.InProgress;
                     }
 
-                    TempData["SuccessMessage"] = $"Transport unit '{newTransportUnitName}' has been assigned to the load. Job status updated to In Progress.";
+                    TempData["SuccessMessage"] = $"Transport unit '{newTransportUnitName}' has been assigned to the load.";
                 }
                 else
                 {
-                    load.Status = JobStatus.Approved; // Reset to approved when unassigning
-                    // Only reset job status if all loads are back to approved
-                    var allLoadsApproved = await _context.Loads
-                        .Where(l => l.JobId == jobId)
-                        .AllAsync(l => l.Status == JobStatus.Approved);
+                    load.Status = JobStatus.Pending; // Reset to pending when unassigning
                     
-                    if (allLoadsApproved)
+                    // Check current status of all loads to determine job status
+                    var allLoads = await _context.Loads
+                        .Where(l => l.JobId == jobId)
+                        .ToListAsync();
+                    
+                    // Update the current load in the list
+                    var currentLoadInList = allLoads.FirstOrDefault(l => l.LoadId == loadId);
+                    if (currentLoadInList != null)
+                    {
+                        currentLoadInList.Status = JobStatus.Pending;
+                    }
+                    
+                    // Determine job status based on all loads
+                    if (allLoads.All(l => l.Status == JobStatus.Pending))
                     {
                         load.Job.Status = JobStatus.Approved;
                     }
+                    else if (allLoads.Any(l => l.Status == JobStatus.InProgress))
+                    {
+                        load.Job.Status = JobStatus.InProgress;
+                    }
+                    else if (allLoads.All(l => l.Status == JobStatus.Delivered))
+                    {
+                        load.Job.Status = JobStatus.Delivered;
+                    }
+                    else if (allLoads.All(l => l.Status == JobStatus.Completed))
+                    {
+                        load.Job.Status = JobStatus.Completed;
+                    }
+                    
                     TempData["SuccessMessage"] = oldTransportUnitName != null 
                         ? $"Transport unit '{oldTransportUnitName}' has been unassigned from the load."
                         : "Transport unit has been unassigned from the load.";
@@ -236,19 +254,29 @@ namespace EShiftSystem.Areas.Admin.Controllers
                 // Update load status to Delivered
                 load.Status = JobStatus.Delivered;
 
-                // Check if all loads in the job are delivered
+                // Check the status of all loads to determine job status
                 var allLoads = await _context.Loads
                     .Where(l => l.JobId == jobId)
                     .ToListAsync();
 
-                if (allLoads.All(l => l.Status == JobStatus.Delivered))
+                // Determine job status based on all loads
+                if (allLoads.All(l => l.Status == JobStatus.Completed))
                 {
+                    // All loads are completed by customer
+                    load.Job.Status = JobStatus.Completed;
+                    load.Job.UpdatedAt = DateTime.Now;
+                    TempData["SuccessMessage"] = "Load marked as delivered! All loads are completed - job status updated to Completed.";
+                }
+                else if (allLoads.All(l => l.Status == JobStatus.Delivered || l.Status == JobStatus.Completed))
+                {
+                    // All loads are delivered (waiting for customer confirmation) or completed
                     load.Job.Status = JobStatus.Delivered;
                     load.Job.UpdatedAt = DateTime.Now;
                     TempData["SuccessMessage"] = "Load marked as delivered! All loads delivered - job status updated to Delivered.";
                 }
                 else
                 {
+                    // Some loads are still in progress
                     TempData["SuccessMessage"] = "Load marked as delivered successfully.";
                 }
 

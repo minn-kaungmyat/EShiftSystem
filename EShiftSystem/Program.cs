@@ -2,6 +2,7 @@ using EShiftSystem.Data;
 using EShiftSystem.Models;
 using EShiftSystem.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 // create web application builder
@@ -14,12 +15,19 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // configure identity system with roles and email confirmation
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => 
+{
+    options.SignIn.RequireConfirmedAccount = false; 
+    options.SignIn.RequireConfirmedEmail = false; 
+})
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 // register custom services for dependency injection
 builder.Services.AddScoped<IJobNumberGenerator, JobNumberGenerator>();
+
+//// register email services
+//builder.Services.AddScoped<IEmailSender, SendGridEmailSender>();
 
 // add mvc controllers and views support
 builder.Services.AddControllersWithViews();
@@ -30,12 +38,14 @@ var app = builder.Build();
 // configure middleware pipeline for different environments
 if (app.Environment.IsDevelopment())
 {
+    //shows detailed migration errors for developers
     app.UseMigrationsEndPoint();
 }
 else
 {
+    //friendly error page for users
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // the default HSTS value is 30 days.
     app.UseHsts();
 }
 
@@ -61,6 +71,11 @@ app.MapControllerRoute(
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    
+    // apply any pending database migrations automatically
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    context.Database.Migrate();
+    
     await SeedData.Initialize(services);
 }
 

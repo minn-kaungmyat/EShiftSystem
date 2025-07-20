@@ -15,6 +15,7 @@
         <tr>
             <th>License Plate</th>
             <th>Model</th>
+            <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -24,13 +25,27 @@
             <tr>
                 <td>@item.LicensePlate</td>
                 <td>@item.Model</td>
+                <td>
+                    @if (item.IsAssigned)
+                    {
+                        <span class="badge bg-warning">Assigned</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Available</span>
+                    }
+                </td>
                <td>
     <a class="btn btn-sm btn-outline me-2" asp-action="Edit" asp-route-id="@item.LorryId" title="Edit">
         <i class="fas fa-edit"></i> Edit
     </a>
-    <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@item.LorryId" title="Delete">
-        <i class="fas fa-trash-alt"></i> Delete
-    </a>
+    @if (!item.IsAssigned)
+    {
+        <a class="btn btn-sm btn-outline text-danger" asp-action="Delete" asp-route-id="@item.LorryId" title="Delete">
+            <i class="fas fa-trash-alt"></i> Delete
+        </a>
+    }
+  
 </td>
 
             </tr>

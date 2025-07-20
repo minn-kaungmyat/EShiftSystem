@@ -5,25 +5,20 @@
 namespace EShiftSystem.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddIsActiveToCustomer : Migration
+    public partial class FixExistingCustomersActiveStatus : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsActive",
-                table: "Customers",
-                type: "bit",
-                nullable: false,
-                defaultValue: true);
+            // Update all existing customers to be active
+            migrationBuilder.Sql("UPDATE Customers SET IsActive = 1 WHERE IsActive = 0");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "IsActive",
-                table: "Customers");
+            // Revert all customers to inactive (original state after the first migration)
+            migrationBuilder.Sql("UPDATE Customers SET IsActive = 0");
         }
     }
 }

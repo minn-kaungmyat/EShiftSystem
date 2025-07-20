@@ -15,5 +15,8 @@ namespace EShiftSystem.Models
         // driver's license number for identification
         [Required, MaxLength(20)]
         public required string License { get; set; }
+
+        // indicates if the driver is currently assigned to a transport unit
+        public bool IsAssigned { get; set; } = false;
     }
 }

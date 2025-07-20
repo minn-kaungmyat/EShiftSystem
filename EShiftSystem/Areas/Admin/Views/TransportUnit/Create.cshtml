@@ -58,6 +58,9 @@
                 allowClear: true,
                 maximumSelectionLength: 4
             });
+            
+            // Remove required validation for assistants
+            $('#assistantSelect').removeAttr('required');
 
             // Initialize Select2 for single selection
             $('.select2-single').select2({

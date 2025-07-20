@@ -17,5 +17,8 @@ namespace EShiftSystem.Models
         
         // navigation property to assigned transport unit
         public TransportUnit? TransportUnit { get; set; }
+
+        // indicates if the assistant is currently assigned to a transport unit
+        public bool IsAssigned { get; set; } = false;
     }
 }
